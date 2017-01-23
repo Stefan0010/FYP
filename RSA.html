@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>FYP Project</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Stefan Artaputra Indriawan">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="C:\Users\Z480\Desktop\final year project\css\bootstrap.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="C:\Users\Z480\Desktop\final year project\css\sidebar.css">
+    
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  
+  <!-- Bootstrap Core JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- Bootstrap Sidebar Toggle JavaScript -->
+  <script src="C:\Users\Z480\Desktop\final year project\js\javascript.js"></script>
+
+</head>
+<body>
+      <div id="wrapper">
+        <div class="overlay"></div>
+    
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                       Web Demo
+                    </a>
+                </li>
+                <li>
+                    <a href="./frontpage.html">Home</a>
+                </li>
+                <li>
+                    <a href="#">About</a>
+                </li>
+                <li>
+                    <a href="#">ECS</a>
+                </li>
+                <li class="dropdown">
+                  <a href="./RSA.html" class="dropdown-toggle" data-toggle="dropdown">RSA <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li class="dropdown-header">Get your Private key in here!</li>
+                    <li><a href="./RSA.html" class="active">Input</a></li>
+                    <li><a href="#keygen" class="locked">Keygen</a></li>
+                    <li><a href="#encrypt" class="locked">Encrypt</a></li>
+                    <li><a href="#decrypt" class="locked">Decrypt</a></li>
+                  </ul>
+                </li>
+                <li>
+                    <a href="#">Contact Us</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+          <span class="hamb-middle"></span>
+        <span class="hamb-bottom"></span>
+            </button>
+
+            <!-- Input Section -->
+            <section id="input" class="collapse-in">
+              <div class="container">
+                  <div class="row">
+                    <div class="page-header">
+                     <h1>Input</h1>
+                   </div>
+                    <form>
+                      <div class="form-group">
+                        <h2>Input the message that you want to encrypt:</h2>
+                      </div>
+                      <div class="form-group">
+                        <textarea class="form-control" rows="5" id="inp"></textarea>
+                      </div>
+                      <div class="form-group">
+                        <button type="button" class="btn btn-lg btn-primary">Convert to Numeric</button>
+                      </div>
+                      <div class="form-group">
+                        <div class="well" id="numeric">Basic Well</div>   
+                      </div>  
+                      <div class="form-group">
+                        <button type="button" class="btn btn-success btn-lg pull-right" href="#keygen" data-toggle="collapse" id="btn-input">Next</button>
+                      </div>
+                    </form>
+              
+                  </div>
+              
+              </div>
+            </section>
+            <!-- /#input -->
+
+            <!-- Keygen Section -->
+            <section id="keygen" class="collapse">
+              <div class="container">
+                  <div class="row">
+                    <div class="page-header">
+                       <h1>Keygen</h1>
+                    </div>
+                    <form>
+                      <div class="form-group">
+                        <h2>Pick e,p, and q:</h2>
+                      </div>
+                    </form>
+                    <form class="form-inline">
+                      <div class="form-group">
+                        <label for="e">e:</label>
+                        <input type="text" class="form-control" id="e">
+                      </div>
+                      <div class="form-group">
+                        <label for="p">p:</label>
+                        <input type="text" class="form-control" id="p">
+                      </div>
+                      <div class="form-group">
+                        <label for="q">q:</label>
+                        <input type="text" class="form-control" id="q">
+                      </div>
+                    </form>
+                    <form>
+                      <div class="form-group"></div>
+                      <div class="form-group">
+                        <button type="button" class="btn btn-info btn-lg" href="#calc-keygen" data-toggle="collapse" id="btn-calc">Calculate</button>
+                      </div>
+                      <fieldset id="keygen-info" disabled>
+                        <div class="form-group">
+                          <label for="n">n:</label>
+                          <input type="text" class="form-control"id="n">
+                        </div>
+                        <div class="form-group">
+                          <label for="Φn">Φn:</label>
+                          <input type="text" class="form-control"id="Φn">
+                        </div>
+                        <div class="form-group">
+                          <label for="d">d:</label>
+                          <input type="text" class="form-control"id="d">
+                        </div>
+                      </fieldset>
+                      <div class="form-group">
+                        <button type="button" class="btn btn-success btn-lg pull-right" href="#encrypt" data-toggle="collapse" id="btn-keygen" disabled>Next</button>
+                      </div>
+                      </form>
+                
+                    </div>
+              
+              </div>
+            </section>
+            <!-- /#keygen -->
+
+            <!-- Encrypt Section -->
+            <section id="encrypt" class="collapse">
+              <div class="container">
+                  <div class="row">
+                    <div class="page-header">
+                      <h1>Encryption</h1>
+                    </div>
+                    <form>
+                     <div class="form-group">
+                        <label for="out">Message:</label>
+                        <div class="well" id="out" val="Basic"></div>
+                      </div>
+                      <div class="form-group">
+                        <label for="p-out">p:</label>
+                        <div class="well" id="p-out">Basic Well</div>
+                      </div>
+                      <div class="form-group">
+                        <label for="q-out">q:</label>
+                        <div class="well" id="q-out">Basic Well</div>
+                      </div>
+                      <div class="form-group">
+                        <label for="n-out">n:</label>
+                        <div class="well" id="n-out">Basic Well</div>
+                      </div>
+                      <div class="form-group">
+                        <label for="e-out">e:</label>
+                        <div class="well" id="e-out">Basic Well</div>
+                      </div>
+                      <div class="form-group">
+                        <label for="result">Encryption: (message^e) mod (n) </label>
+                        <div class="well" id="enc-out">Basic Well</div>
+                      </div>
+                        <button type="button" class="btn btn-success btn-lg pull-right"href="#decrypt" data-toggle="collapse" id="btn-encrypt">Next</button>
+                      </div>
+                    </form>
+              
+                  </div>
+              
+              </div>
+            </section>
+            <!-- /#encrypt -->
+
+            <!-- Decrypt Section -->
+            <section id="decrypt" class="collapse">
+              <div class="container">
+                  <div class="row">
+                    <div class="page-header">
+                      <h1>Decryption</h1>
+                    </div>
+                    <form>
+                      <div class="form-group">
+                        <label for="encrypted">Encrypted:</label>
+                        <div class="well" id="encrypted"></div>
+                      </div>
+                      <div class="form-group">
+                        <label for="n-out2">n:</label>
+                        <div class="well" id="n-out2"></div>
+                      </div>
+                      <div class="form-group">
+                        <label for="d-out2">d:</label>
+                        <div class="well" id="d-out2"></div>
+                      </div>
+                      <div class="form-group">
+                        <label for="result2">Decryption: (Encrypted^d) mod (n) </label>
+                        <div class="well" id="result2"></div>
+                      </div>
+                      <div class="form-group">
+                        <label for="converted">Convert to text: </label>
+                        <div class="well" id="converted"></div>
+                      </div>
+   <!--                    <div class="form-group">
+                          <button type="button" class="btn btn-success btn-lg pull-right" id="btn-decrypt ">Convert Back!
+                          </button>
+                        </div> -->
+                    </form>
+              
+                  </div>
+              
+              </div>
+            </section>
+            <!-- /#decrypt -->
+
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+</body>
+</html>
