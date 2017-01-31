@@ -1,3 +1,6 @@
+//still have big data problems, either enhance the conversion func or handle the bigInteger type
+
+
 $(document).ready(function () {
   var trigger = $('.hamburger'),
       overlay = $('.overlay'),
@@ -29,18 +32,33 @@ $(document).ready(function () {
    button_calc.on('click',function(){
     var num = parseInt($('#convert').text()),
         tag = '#alert_modulo',
-        message = '<strong>Warning!</strong> your modulo (n) is smaller than the encrypted message!';
+        message = '<strong>Warning!</strong> your modulo (n) is smaller than the encrypted message!',
+        tag_gcd = '#alert_gcd',
+        message_gcd = 'the public key value(e) must be within [3,Φn) and has a greatest common divisor of 1 with Φn!';
 
+    //this will verify if the input for e,p,q are integers or not
     if (!verify()) {
       $('#n').val('');
       $('#Φn').val('');
       $('#d').val('');
       bootstrap_alert.fade(tag);
-      return 0;
     }
+
+    //calculate the following using the inputs
     $('#n').val(calc()[0]);
     $('#Φn').val(calc()[1]);
     $('#d').val(calc()[2]);
+
+    var e = $('#e').val(),
+        Φn = $('#Φn').val();
+    // if the public key inputted is less than 3 or does not have gcd of 1 with the tao, alert the user
+    if (gcd(e,Φn) != 1 || e < 3) {
+      bootstrap_alert.warning(tag_gcd,message_gcd);
+    }
+    else{
+      bootstrap_alert.fade(tag_gcd);
+    }
+
     if (num > $('#n').val()) {
       $('#btn-keygen').prop('disabled',true);
       bootstrap_alert.warning(tag,message);
@@ -196,6 +214,17 @@ $(document).ready(function () {
       return true;
     }
 
+  }
+
+  function gcd(a,b) {
+    // if b > 0 it will do a recursion w
+    if (b){
+      return gcd(b,a%b);
+    }
+    //return abs(a)
+    else{
+      return Math.abs(a);
+    }
   }
 
   function Euclid_gcd(a, b) {
