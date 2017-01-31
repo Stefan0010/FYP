@@ -5,10 +5,9 @@ $(document).ready(function () {
       button_inp = $('#btn-input'),
       button_key = $('#btn-keygen'),
       button_enc = $('#btn-encrypt'),
-      button_dec = $('#btn-decrypt'),
+      // button_dec = $('#btn-decrypt'),
       button_calc = $('#btn-calc'),
-      num = 9,
-      msg = "m",
+      button_conv = $('#btn-conv'),
       // privateExponent =  
       // modulus = prime1*prime2,
       // encryptCoef = privateExponent % 
@@ -17,85 +16,84 @@ $(document).ready(function () {
      isClosed = false;
 
      button_inp.click(function() {
-      console.log(num);
-      
+        
      });
 
+     button_conv.click(function() {
+      var converted = convert_text();
+      $('#convert').text(converted);
+
+    });
+
+     button_calc.click(function(){
+      var num = $('#convert').text();
+        $('#n').val(calc()[0]);
+        $('#Φn').val(calc()[1]);
+        $('#d').val(calc()[2]);
+        $('#btn-keygen').removeAttr('disabled');
+
+    });
+
      button_key.click(function() {
-      var e = getVar()[0],
-        p = getVar()[1],
-        q =getVar()[2],
-        d = calc2(e,p,q)[2],
-        n = calc2(e,p,q)[0],
-        enc = calc(e,d,n)[0],
-        dec = calc(e,d,n)[1];
+      var e =$('#e').val(),
+          p =$('#p').val(),
+          q =$('#q').val(),
+          n =$('#n').val(),
+          enc = calc()[3],
+          msg = $('#inp').val();
+      $('#e-out').text(e);
+      $('#p-out').text(p);
+      $('#q-out').text(q);
+      $('#n-out').text(n);
       $('#out').text(msg); 
       $('#enc-out').text(enc);
-      $('#encrypted').text(enc);
-      $('#result2').text(dec);
         
     });
 
-    button_calc.click(function(){
-      var e = getVar()[0],
-        p = getVar()[1],
-        q =getVar()[2];
-      $('#n').val(calc2(e,p,q)[0]);
-      $('#Φn').val(calc2(e,p,q)[1]);
-      $('#d').val(calc2(e,p,q)[2]);
+     button_enc.click(function() {
+      var enc = $('#enc-out').text(),
+          dec = calc()[4],
+          msg = $('#inp').val(),
+          d =$('#d').val(),
+          n =$('#n').val();
 
-      $('#btn-keygen').removeAttr('disabled');
-
-      $('#n-out').text(calc2(e,p,q)[0]);
-      $('#n-out2').text(calc2(e,p,q)[0]);
-      $('#p-out').text(p);
-      $('#q-out').text(q);
-      $('#e-out').text(e); 
-      $('#d-out').text(calc2(e,p,q)[2]); 
-      $('#d-out2').text(calc2(e,p,q)[2]); 
+      $('#encrypted').text(enc);
+      $('#n-out2').text(n);
+      $('#d-out').text(d); 
+      $('#result2').text(dec);
       $('#converted').text(msg);
-
-    });
-
-    button_enc.click(function() {
-
-      
-   });
-
-   button_dec.click(function() {
-      
      });
+
 
     trigger.click(function () {
       hamburger_cross();      
     });
 
-    // condense calc and calc2 later on
-    function calc(e,d,n) {
-      var encryptCoef =  Math.pow(num,e) % n,
+    function convert_text(){
+    var enc="",
+        m = $('#inp').val(),
+        str="";
+    str = m.toString();
+    for (var i =0;i< m.length;i++){
+      var block = m.charCodeAt(i);
+      enc = enc + block;
+    }
+    return enc;
+  }
+
+    function calc() {
+      var e = parseInt($('#e').val()),
+          p = parseInt($('#p').val()),
+          q = parseInt($('#q').val()),
+          n = p*q,
+          tao = (p-1)*(q-1),
+          d = tao + Euclid_gcd(tao,e)[2],   
+          num = parseInt($('#convert').text()),
+
+          encryptCoef =  Math.pow(num,e) % n,
           decryptCoef =  Math.pow(encryptCoef,d) % n,
-          arr = [encryptCoef,decryptCoef];
-      // console.log(prime1);
-      // console.log(prime2); 
-      // console.log(privateExponent);
-      // console.log(modulus);
-      // console.log(tao);
-      return arr;
-    }
-
-    function getVar() {
-      var publicExponent = parseInt($('#e').val()),
-          prime1 =parseInt($('#p').val()),
-          prime2 =parseInt($('#q').val()),
-          arr = [publicExponent,prime1,prime2];
-      return arr;
-    }
-
-    function calc2(e,p,q) {
-      var n = p*q;
-      var tao = (p-1)*(q-1);
-      var d = tao + Euclid_gcd(tao,e)[2];
-      var arr=[n,tao,d];
+          arr = [n,tao,d,encryptCoef,decryptCoef];
+      console.log(num);
       return arr;
     }
 
@@ -113,6 +111,8 @@ $(document).ready(function () {
         isClosed = true;
       }
   }
+
+
   
   $('[data-toggle="offcanvas"]').click(function () {
         $('#wrapper').toggleClass('toggled');
