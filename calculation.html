@@ -25,62 +25,25 @@
   <!-- Bootstrap Sidebar Toggle JavaScript -->
   <script src="C:\Users\Z480\Desktop\FYP\js\javascript.js"></script>
 
+  <script>
+function goBack() {
+    window.history.back();
+}
+</script>
+
 
 </head>
 <body>
-      <div id="wrapper">
-        <div class="overlay"></div>
-    
-        <!-- Sidebar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
-            <ul class="nav sidebar-nav">
-                <li class="sidebar-brand">
-                    <a href="#">
-                       Web Demo
-                    </a>
-                </li>
-                <li>
-                    <a href="./frontpage.html">Home</a>
-                </li>
-                <li>
-                    <a href="#">About</a>
-                </li>
-
-                <li>
-                    <a href="#">ECS</a>
-                </li>
-                <li>
-                    <a href="./RSA.html">RSA</a>
-<!--                 <li class="dropdown">
-                  <a href="./RSA.html" class="dropdown-toggle" data-toggle="dropdown">RSA <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li class="dropdown-header">Get your Private key in here!</li>
-                    <li><a href="./RSA.html" class="active">Input</a></li>
-                    <li><a href="#keygen" class="locked">Keygen</a></li>
-                    <li><a href="#encrypt" class="locked">Encrypt</a></li>
-                    <li><a href="#decrypt" class="locked">Decrypt</a></li>
-                  </ul> -->
-                </li>
-                <li>
-                    <a href="./calculation.html">Calculation</a>
-                </li>
-                <li>
-                    <a href="#">Contact Us</a>
-                </li>
-            </ul>
-        </nav>
-        <!-- /#sidebar-wrapper -->
+        <!-- Sidebar -->        <!-- /#sidebar-wrapper -->
 
         <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
-                <span class="hamb-top"></span>
-          <span class="hamb-middle"></span>
-        <span class="hamb-bottom"></span>
-            </button>
-
-          <!-- p input -->
+        <div id="page-content-wrapper"> 
+          <button type="button" onclick="goBack()" class="hamburger is-closed">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+          </button>
+          <!-- p input -->  
         <div class="container">
+          
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
