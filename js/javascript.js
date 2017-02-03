@@ -460,7 +460,6 @@ RSA.Miller_Rabin.calc_demo = function(n,k) {
   //for step details purpose
   // var message2 = sessionStorage.getItem('message');
   var message = [];
-  console.log(n===2);
   if (n === 2 || n === 3){
     message.push("since p is either 2/3 then p is a prime number.\n");
     sessionStorage.setItem('message',message);
@@ -491,12 +490,18 @@ RSA.Miller_Rabin.calc_demo = function(n,k) {
       message.push('cannot test higher than 30 rounds');
       break;
     }
+    if (a> n-2) break;
+
     message.push('for a equals to : '+ a+'\n');
     var x = Math.pow(a, d) % n;
     message.push('1. x = a^d mod n\n');
     message.push('x = '+a+'^'+d+' mod '+n+'\n');
     message.push('x = '+x+'\n');
     console.log(x);
+    if (x === 1 || x === n - 1){
+      message.push("x is equals to 1/n-1 -> choose another number\n");
+      continue;
+    }
     message.push('2. x = x * x % n \n');
     message.push('x will be tested for '+s+' times\n');
     for (var i = s; i--;) {
