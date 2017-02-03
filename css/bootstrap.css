@@ -12,6 +12,7 @@ html {
 body {
   margin: 0;
 }
+
 article,
 aside,
 details,
@@ -2595,7 +2596,7 @@ fieldset[disabled] .form-control {
   cursor: not-allowed;
 }
 textarea.form-control {
-  height: auto;
+  height: 100%;
 }
 input[type="search"] {
   -webkit-appearance: none;

@@ -1,6 +1,6 @@
 //still have big data problems, either enhance the conversion func or handle the bigInteger type
 
-//incorporate BigInt.js to later calc as well
+//incorporate BigInt.js to later calc as well ===>>> ASAP!!!
 
 $(document).ready(function () {
   var trigger = $('.hamburger'),
@@ -12,7 +12,13 @@ $(document).ready(function () {
       // button_dec = $('#btn-decrypt'),
       button_calc = $('#btn-calc'),
       button_conv = $('#btn-conv'),
+      button_show=$('#btn-show'),
+      count_bef,count_aft = -1;
+      MRMessage = [];
      isClosed = false;
+  sessionStorage.setItem('count1',count_bef);
+  sessionStorage.setItem('count2',count_aft);
+  sessionStorage.setItem('message',MRMessage);
 
    button_inp.click(function() {
     // for (var j =0; j < 30; j++){
@@ -147,6 +153,39 @@ $(document).ready(function () {
     $('#converted').text(msg);
    });
 
+   button_show.on('click',function(){
+    $('#collapse2').collapse('hide');
+    $('#collapse3').collapse('hide');
+    var p =parseInt($('#p_calc').val());
+    var q =parseInt($('#q_calc').val());
+    RSA.Miller_Rabin.calc_demo(p,5);
+    var para ='';
+    var message = (sessionStorage.getItem('message')).split(',');
+    console.log(message);
+    var index =0;
+    while(typeof message[index] !='undefined' && message[index].length>0 ){
+      if(index >= message.length) break;  
+      var para = para + message[index];
+      index++;
+  }
+    $('#step_p').html('<pre>'+para +'</pre>');
+
+    //for q
+    RSA.Miller_Rabin.calc_demo(q,5);
+    var para ='';
+    var message = (sessionStorage.getItem('message')).split(',');
+    var index =0;
+    while(typeof message[index] !='undefined' && message[index].length>0 ){
+      if(index >= message.length) break;  
+      var para = para + message[index];
+      index++;
+  }
+  var res = para.replace('p','q');
+    $('#step_q').html('<pre>'+res+'</pre>');
+
+
+   });
+
 
   $('#e').keyup(function() {
     var e =$('#e').val(),
@@ -164,6 +203,7 @@ $(document).ready(function () {
     var e =$('#e').val(),
         p =$('#p').val(),
         q =$('#q').val();
+    sessionStorage.setItem('p',p);
     if(e.length ===0 || p.length === 0 || q.length === 0){
       $('#btn-calc').prop('disabled',true);
     }
@@ -176,6 +216,7 @@ $(document).ready(function () {
     var e =$('#e').val(),
         p =$('#p').val(),
         q =$('#q').val();
+    sessionStorage.setItem('q',q);
     if(e.length ===0 || p.length === 0 || q.length === 0){
       $('#btn-calc').prop('disabled',true);
     }
@@ -183,6 +224,12 @@ $(document).ready(function () {
       $('#btn-calc').prop('disabled',false);
     }
   })
+
+// sync the input from rsa to calc html
+if (document.getElementById("p_calc") != null && document.getElementById("p_calc") != null) {
+  document.getElementById("p_calc").value = (sessionStorage.getItem('p'));  
+  document.getElementById("q_calc").value = (sessionStorage.getItem('q'));
+}
 
   trigger.click(function () {
     hamburger_cross();      
@@ -377,20 +424,99 @@ RSA.Miller_Rabin.calc = function(a,i,n) {
   // takes BigInt a, i, n
   var one  = int2bigInt(1,1,1);
   var zero = int2bigInt(0,1,1);
+  var count1 = sessionStorage.getItem('count1');
+  var count2 = sessionStorage.getItem('count2');
+  // var x_arr = JSON.parse(sessionStorage.x_arr) || [];
+  // var y_arr = JSON.parse(sessionStorage.y_arr) || [];
   if (isZero(i)) return one;
 
   //  j = floor(i/2)
   var j = dup(i); divInt_(j,2);
-
-  var x = RSA.Miller_Rabin.calc(a, j, n);    
+  count1++;
+  console.log(j);
+  sessionStorage.setItem('count1',count_bef);
+  var x= RSA.Miller_Rabin.calc(a, j, n);
+  count2++;
+  sessionStorage.setItem('count2',count_aft);
+  // x_arr.push(x);
+  // sessionStorage.x_arr = JSON.stringify(x_arr);    
   if (isZero(x)) return zero;
  
   //  y = (x*x)%n
   var y = expand(x,n.length); squareMod_(y,n);
   if (equalsInt(y,1) && !equalsInt(x,1) && !equals(x, addInt(n,-1)) ){
+    // y_arr.push(y);
+    // sessionStorage.y_arr = JSON.stringify(y_arr); 
     return zero; 
   }
+  //y = (y*a)%n -> y=(x*x*a)%number
   if (i[0]%2==1) multMod_(y,a,n);
+  // y_arr.push(y);
+  // sessionStorage.y_arr = JSON.stringify(y_arr); 
   return y;
  }
+
+RSA.Miller_Rabin.calc_demo = function(n,k) {
+  //for step details purpose
+  // var message2 = sessionStorage.getItem('message');
+  var message = [];
+  console.log(n===2);
+  if (n === 2 || n === 3){
+    message.push("since p is either 2/3 then p is a prime number.\n");
+    sessionStorage.setItem('message',message);
+    return true;
+  }
+  if (n % 2 === 0 || n < 2){
+    message.push("since p is even or p is less than 2 then p is a composite number.\n");
+    sessionStorage.setItem('message',message);
+    return false;
+ }
+  // Write (n - 1) as 2^s * d
+  var s = 0, d = n - 1;
+  while (d % 2 === 0) {
+    d /= 2;
+    ++s;
+  }
+  var j = -1;
+  message.push('to determine if p is a prime-> n-1 ('+ (n - 1) + ') is written as 2^s*d -> with s equals to '+s+' and d equals to '+d+'\n');
+  message.push('p will be tested for '+k+' rounds with a small base primes : [2;3;5;etc]\n');
+
+  WitnessLoop: do {
+    j++;
+    // A base between 2 and n - 2
+    
+    var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113];
+    if(j <= 30) var a = smallPrimes[j];
+    else{
+      message.push('cannot test higher than 30 rounds');
+      break;
+    }
+    message.push('for a equals to : '+ a+'\n');
+    var x = Math.pow(a, d) % n;
+    message.push('1. x = a^d mod n\n');
+    message.push('x = '+a+'^'+d+' mod '+n+'\n');
+    message.push('x = '+x+'\n');
+    console.log(x);
+    message.push('2. x = x * x % n \n');
+    message.push('x will be tested for '+s+' times\n');
+    for (var i = s; i--;) {
+      x = x * x % n;
+      message.push('x = '+x+'*'+x+' mod '+n+'\n');
+      message.push('x= '+x+'\n');
+      if (x === 1){
+        message.push("x is equals to 1 -> therefore p is a composite number\n");
+        sessionStorage.setItem('message',message);
+        return false;
+      }
+      if (x === n - 1)
+        continue WitnessLoop;
+    }
+    message.push('since x is neither equals to 1 nor n-1 -> p is a composite number');
+    sessionStorage.setItem('message',message);
+    return false;
+  } while (--k);
+  message.push('p is a probable prime number with 99.9% confidence');
+  sessionStorage.setItem('message',message);
+  return true;
+}
 });

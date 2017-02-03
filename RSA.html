@@ -43,7 +43,7 @@
                     <a href="./frontpage.html">Home</a>
                 </li>
                 <li>
-                    <a href="#">About</a>
+                    <a href="./calculation.html">About</a>
                 </li>
 
                 <li>
@@ -61,9 +61,9 @@
                     <li><a href="#decrypt" class="locked">Decrypt</a></li>
                   </ul> -->
                 </li>
-                <li>
-                    <a href="#">Calculation</a>
-                </li>
+<!--                 <li>
+                    <a href="./calculation.html">Calculation</a>
+                </li> -->
                 <li>
                     <a href="#">Contact Us</a>
                 </li>
@@ -117,26 +117,30 @@
                     <div class="page-header">
                        <h1>Keygen</h1>
                     </div>
-                    <form>
+                    <form method="GET">
                       <div class="form-group">
                         <h2>Pick e,p, and q:</h2>
                       </div>
-                    </form>
-                    <form class="form-inline">
-                      <div class="form-group">
-                        <label for="e">e:</label>
-                        <input type="text" class="form-control" id="e">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label for="e">e:</label>
+                          <textarea class = 'form-control' rows="8" id = "e"></textarea>
+                        </div>
                       </div>
-                      <div class="form-group">
-                        <label for="p">p:</label>
-                        <input type="text" class="form-control" id="p">
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label for="p">p:</label>
+                          <textarea class = 'form-control' rows="8" id = "p"></textarea>
+                        </div>
                       </div>
-                      <div class="form-group">
-                        <label for="q">q:</label>
-                        <input type="text" class="form-control" id="q">
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label for="q">q:</label>
+                          <textarea class = 'form-control' rows="8" id = "q"></textarea>
+                        </div>
                       </div>
-                    </form>
-                    <form>
+                    </div>
                       <div class="form-group">
                         <div id = "alert_integer"></div>  
                         <div id = "alert_gcd"></div>
@@ -144,7 +148,19 @@
                         <div id = "alert_miller_q"></div>
                       </div>
                       <div class="form-group">
-                        <button type="button" class="btn btn-info btn-lg" href="#calc-keygen" data-toggle="collapse" id="btn-calc" disabled>Calculate!</button>
+                      <div class="row">
+                        <div class="col-md-3">
+                          <button type="button" class="btn btn-info btn-lg" href="#calc-keygen" data-toggle="collapse" id="btn-calc" disabled>Calculate!</button>
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-3">
+
+                          <ul class="pager">
+                            <li><a href="./calculation.html" id="MRPager"><strong>>>Step Details for primality test</strong></a>
+                            </li>
+                          </ul>
+                        </div>
                         <div id = "alert_modulo"></div>
                       </div>
                       <fieldset id="keygen-info" disabled>
