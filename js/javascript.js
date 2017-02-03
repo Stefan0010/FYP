@@ -12,6 +12,7 @@ $(document).ready(function () {
       // button_dec = $('#btn-decrypt'),
       button_calc = $('#btn-calc'),
       button_conv = $('#btn-conv'),
+      button_MRcalc = $('#btn-MRcalc'),
       button_show=$('#btn-show'),
       count_bef,count_aft = -1;
       MRMessage = [];
@@ -153,7 +154,9 @@ $(document).ready(function () {
     $('#converted').text(msg);
    });
 
-   button_show.on('click',function(){
+   button_MRcalc.on('click',function(){
+    $('#collapse').collapse('hide');
+    $('#collapse1').collapse('hide');
     $('#collapse2').collapse('hide');
     $('#collapse3').collapse('hide');
     var p =parseInt($('#p_calc').val());
