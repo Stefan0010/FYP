@@ -14,12 +14,18 @@ $(document).ready(function () {
       button_conv = $('#btn-conv'),
       button_MRcalc = $('#btn-MRcalc'),
       button_show=$('#btn-show'),
-      count_bef,count_aft = -1;
-      MRMessage = [];
-     isClosed = false;
+
+      //rabbin miller demo purposes
+      count_bef = -1,
+      isClosed = false,
+      MRMessage = [],
+      x_arr_0 = [],
+      y_arr_0 = [];
+     
   sessionStorage.setItem('count1',count_bef);
-  sessionStorage.setItem('count2',count_aft);
   sessionStorage.setItem('message',MRMessage);
+  sessionStorage.setItem('x',JSON.stringify(x_arr_0));
+  sessionStorage.setItem('y',JSON.stringify(y_arr_0));
 
    button_inp.click(function() {
     // for (var j =0; j < 30; j++){
@@ -36,11 +42,10 @@ $(document).ready(function () {
    button_conv.click(function() {
     var converted = RSA.convert_text();
     $('#convert').text(converted);
-
   });
 
    button_calc.on('click',function(){
-    var num = parseInt($('#convert').text()),
+    var num = $('#convert').text(),
         tag = '#alert_modulo',
         message = '<strong>Warning!</strong> your modulus (n) is smaller than the encrypted message!',
         tag_gcd = '#alert_gcd',
@@ -63,13 +68,17 @@ $(document).ready(function () {
     $('#n').val(RSA.calc()[0]);
     $('#Φn').val(RSA.calc()[1]);
     $('#d').val(RSA.calc()[2]);
-
     var e = $('#e').val(),
+        n = $('#n').val(),
         Φn = $('#Φn').val(),
         p =$('#p').val(),
-        q =$('#q').val();
+        q =$('#q').val(),
+        e_big = bigIntconv(e),
+        Φn_big = bigIntconv(Φn),
+        p_big = bigIntconv(p),
+        q_big = bigIntconv(q);
     // if the public key inputted is less than 3 or does not have gcd of 1 with the tao, alert the user
-    if (RSA.gcd(e,Φn) != 1 || e < 3) {
+    if (GCD(e_big,Φn_big) != 1 || greater(int2bigInt(3,1,1),e)) {
       flag_gcd = false;
       bootstrap_alert.warning(tag_gcd,message_gcd);
     }
@@ -79,7 +88,7 @@ $(document).ready(function () {
     }
 
     // if the modulo(n) number is lesser than the encrypted, alert the user
-    if (num > $('#n').val()) {
+    if (greater(bigIntconv(num),bigIntconv(n))) {
       flag_modulo = false;
       
       bootstrap_alert.warning(tag,message);
@@ -91,11 +100,13 @@ $(document).ready(function () {
     }
 
     // rabin-miller
-    var MR_p = RSA.Miller_Rabin.MultiRounds(p.toString(),30);
-    var MR_q = RSA.Miller_Rabin.MultiRounds(q.toString(),30);
+    var MR_p = RSA.Miller_Rabin.MultiRounds(p,30);
+    console.log(JSON.parse(sessionStorage.getItem('x')));
+    
+    var MR_q = RSA.Miller_Rabin.MultiRounds(q,30);
     if (MR_p !==true) {
       flag_MR_p = false;
-      if(MR_p.length > 5 ) {
+      if(isNaN(MR_p)) {
         message_miller_p = MR_p;
       }
       bootstrap_alert.warning(tag_miller_p,message_miller_p);
@@ -154,6 +165,7 @@ $(document).ready(function () {
     $('#converted').text(msg);
    });
 
+   //for MR demo button
    button_MRcalc.on('click',function(){
     $('#collapse').collapse('hide');
     $('#collapse1').collapse('hide');
@@ -238,6 +250,10 @@ if (document.getElementById("p_calc") != null && document.getElementById("p_calc
     hamburger_cross();      
   });
 
+  // function isNumeric(num){
+  //   return !isNaN(num);
+  // }
+
   function hamburger_cross() {
 
     if (isClosed == true) {          
@@ -269,22 +285,33 @@ $('[data-toggle="offcanvas"]').click(function () {
     $(tag).hide();
   }
 
-  RSA = function() {}
-  RSA.calc = function() {
-    var e = parseInt($('#e').val()),
-        p = parseInt($('#p').val()),
-        q = parseInt($('#q').val()),
-        n = p*q,
-        tao = (p-1)*(q-1),
-        d = tao + RSA.Euclid_gcd(tao,e)[2],   
-        num = parseInt($('#convert').text()),
 
-        encryptCoef =  Math.pow(num,e) % n,
-        decryptCoef =  Math.pow(encryptCoef,d) % n,
-        arr = [n,tao,d,encryptCoef,decryptCoef];
-    // console.log(num);
+  function bigIntconv(num){
+    return str2bigInt(num.toString(),10,num.length);
+  }
+
+  function strconv(bigInt){
+    return bigInt2str(bigInt,10);
+  }
+
+  RSA = function() {}
+
+  //change calc to supp bigInt
+  RSA.calc = function() {
+    var e_big = bigIntconv($('#e').val()),
+        p_big = bigIntconv($('#p').val()),
+        q_big = bigIntconv($('#q').val()),
+        n = mult(p_big,q_big),
+        tao = mult(addInt(p_big,-1),addInt(q_big,-1)),
+        d =dup(tao);add_(d,RSA.Euclid_gcd(d,e_big)[2]),
+        num = bigIntconv($('#convert').text()),
+        encryptCoef =  powMod(num,e_big,n),
+        decryptCoef =  powMod(encryptCoef,d,n),
+        arr = [strconv(n),strconv(tao),strconv(d),strconv(encryptCoef),strconv(decryptCoef)];
     return arr;
   }
+
+  //reinforce conversion
   RSA.convert_text=function() {
     var enc="",
         m = $('#inp').val(),
@@ -296,13 +323,16 @@ $('[data-toggle="offcanvas"]').click(function () {
     }
     return enc;
   }
+
+  //reinforce verify since we use bigInt
   RSA.verify = function() {
-    var e =  parseInt($('#e').val()),
-        p =  parseInt($('#p').val()),
-        q =  parseInt($('#q').val()),
+    var e =  $('#e').val(),
+        p =  $('#p').val(),
+        q =  $('#q').val(),
+        regex = /(\D)/,
         tag_out = '#alert_integer',
         message = 'Please input an integer!';
-    if (e !== parseInt(e,10)|| p !== parseInt(p,10) ||q !== parseInt(q,10)) {
+    if ( isNaN(e)|| isNaN(p) || isNaN(q) || regex.exec(e) !== null || regex.exec(p) !== null || regex.exec(q) !== null) {
       bootstrap_alert.warning(tag_out,message);
       return false;
     }
@@ -312,57 +342,49 @@ $('[data-toggle="offcanvas"]').click(function () {
     }
 
   }
-  RSA.gcd = function(a,b) {
-    // if b > 0 it will do a recursion w
-    if (b){
-      return RSA.gcd(b,a%b);
-    }
-    //return abs(a)
-    else{
-      return Math.abs(a);
-    }
-  }
+
   RSA.Euclid_gcd = function(a,b) {
-    a = +a;
-    b = +b;
-    if (a !== a || b !== b) {
-      return [NaN, NaN, NaN];
+    var  x = int2bigInt(0,1,1),
+      y = int2bigInt(1,1,1),
+      u = int2bigInt(1,1,1),
+      v = int2bigInt(0,1,1),
+
+      signX = (greater(x,a)) ? -(y) : y,
+      signY = (greater(x,b)) ? -(y) : y,
+
+      //to have the same length as input
+      q = dup(a),
+      r = dup(a),
+      m = dup(a),
+      n = dup(a);
+
+    while (!equalsInt(a,0)) {
+      divide_(b,a,q,r);
+      m =dup(x);sub_(m, (mult(q,u)));
+
+      //n = y -q*v
+      n =dup(y);sub_(n, (mult(q,v)));
+      b = dup(a);
+      a = dup(r);
+      x = dup(u);
+      y = dup(v);
+      u = dup(m);
+      v = dup(n);
     }
     
-    if (a === Infinity || a === -Infinity || b === Infinity || b === -Infinity) {
-      return [Infinity, Infinity, Infinity];
-    }
-    // Checks if a or b are decimals
-    if ((a % 1 !== 0) || (b % 1 !== 0)) {
-      return false;
-    }
-    var signX = (a < 0) ? -1 : 1,
-      signY = (b < 0) ? -1 : 1,
-      x = 0,
-      y = 1,
-      u = 1,
-      v = 0,
-      q, r, m, n;
-    a = Math.abs(a);
-    b = Math.abs(b);
+    return [b, mult(x,signX), mult(y,signY)];
+}
 
-    while (a !== 0) {
-      q = Math.floor(b / a);
-      r = b % a;
-      m = x - u * q;
-      n = y - v * q;
-      b = a;
-      a = r;
-      x = u;
-      y = v;
-      u = m;
-      v = n;
-    }
-    return [b, signX * x, signY * y];
-  }
   RSA.Miller_Rabin = function() {}
 
   RSA.Miller_Rabin.Prescreen = function(s) {
+
+    //reset value before doing q MR
+    sessionStorage.setItem('count1',count_bef);
+    sessionStorage.setItem('message',MRMessage);
+    sessionStorage.setItem('x',JSON.stringify(x_arr_0));
+    sessionStorage.setItem('y',JSON.stringify(y_arr_0));
+
     var s = s.toString().replace(/\s/g,''), len=s.length;
     var f=parseFloat(s), lastDigit=parseInt(s.charAt(len-1),10);
    
@@ -427,35 +449,36 @@ RSA.Miller_Rabin.calc = function(a,i,n) {
   // takes BigInt a, i, n
   var one  = int2bigInt(1,1,1);
   var zero = int2bigInt(0,1,1);
-  var count1 = sessionStorage.getItem('count1');
-  var count2 = sessionStorage.getItem('count2');
-  // var x_arr = JSON.parse(sessionStorage.x_arr) || [];
-  // var y_arr = JSON.parse(sessionStorage.y_arr) || [];
-  if (isZero(i)) return one;
 
+  if (isZero(i)) return one;
   //  j = floor(i/2)
   var j = dup(i); divInt_(j,2);
-  count1++;
-  console.log(j);
-  sessionStorage.setItem('count1',count_bef);
   var x= RSA.Miller_Rabin.calc(a, j, n);
-  count2++;
-  sessionStorage.setItem('count2',count_aft);
-  // x_arr.push(x);
-  // sessionStorage.x_arr = JSON.stringify(x_arr);    
-  if (isZero(x)) return zero;
- 
+
+  var x_arr = JSON.parse(sessionStorage.getItem('x'));
+  var y_arr = JSON.parse(sessionStorage.getItem('y'));
+
+  // x_arr[count1] = strconv(x); 
+  console.log(strconv(x));
+  x_arr.push(strconv(x));
+  console.log(x_arr);
+  sessionStorage.setItem('x',JSON.stringify(x_arr));
+  if (isZero(x)) {
+    sessionStorage.setItem('y',JSON.stringify(y_arr));
+    return zero;
+ }
   //  y = (x*x)%n
   var y = expand(x,n.length); squareMod_(y,n);
   if (equalsInt(y,1) && !equalsInt(x,1) && !equals(x, addInt(n,-1)) ){
-    // y_arr.push(y);
-    // sessionStorage.y_arr = JSON.stringify(y_arr); 
+    // y_arr[count1] = strconv(y);  
+    y_arr.push(strconv(y));   
+    sessionStorage.setItem('y',JSON.stringify(y_arr));
     return zero; 
   }
   //y = (y*a)%n -> y=(x*x*a)%number
   if (i[0]%2==1) multMod_(y,a,n);
-  // y_arr.push(y);
-  // sessionStorage.y_arr = JSON.stringify(y_arr); 
+  y_arr.push(strconv(y));
+  sessionStorage.setItem('y',JSON.stringify(y_arr));
   return y;
  }
 
