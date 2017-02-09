@@ -19,11 +19,15 @@ $(document).ready(function () {
       count_bef = -1,
       isClosed = false,
       MRMessage = [],
+      d_flag = true,
+      flag_sub_test = true,
       x_arr_0 = [],
       y_arr_0 = [];
-     
-  sessionStorage.setItem('count1',count_bef);
-  sessionStorage.setItem('message',MRMessage);
+
+  sessionStorage.setItem('flag',d_flag);
+  sessionStorage.setItem('flag_sub',flag_sub_test);
+  sessionStorage.setItem('count',count_bef);
+  sessionStorage.setItem('message',JSON.stringify(MRMessage));
   sessionStorage.setItem('x',JSON.stringify(x_arr_0));
   sessionStorage.setItem('y',JSON.stringify(y_arr_0));
 
@@ -101,8 +105,10 @@ $(document).ready(function () {
 
     // rabin-miller
     var MR_p = RSA.Miller_Rabin.MultiRounds(p,30);
-    console.log(JSON.parse(sessionStorage.getItem('x')));
-    
+
+    //reset head messages
+    sessionStorage.setItem('flag',d_flag);
+
     var MR_q = RSA.Miller_Rabin.MultiRounds(q,30);
     if (MR_p !==true) {
       flag_MR_p = false;
@@ -379,12 +385,11 @@ $('[data-toggle="offcanvas"]').click(function () {
 
   RSA.Miller_Rabin.Prescreen = function(s) {
 
-    //reset value before doing q MR
-    sessionStorage.setItem('count1',count_bef);
-    sessionStorage.setItem('message',MRMessage);
-    sessionStorage.setItem('x',JSON.stringify(x_arr_0));
-    sessionStorage.setItem('y',JSON.stringify(y_arr_0));
-
+    //reset value before doing another MR
+    sessionStorage.setItem('flag_sub',flag_sub_test);
+    sessionStorage.setItem('count',count_bef);
+    sessionStorage.setItem('message',JSON.stringify(MRMessage));
+    
     var s = s.toString().replace(/\s/g,''), len=s.length;
     var f=parseFloat(s), lastDigit=parseInt(s.charAt(len-1),10);
    
@@ -418,30 +423,59 @@ $('[data-toggle="offcanvas"]').click(function () {
   RSA.Miller_Rabin.MultiRounds = function(n,rounds) {
    // isPrimeMR tests if n is prime using the given number of rounds of the Miller-Rabin test with small prime bases: 2, 3, 5, etc. 
    // up to first 30 rounds of small prime bases
-
-     var res,res2, a,b,s = n.toString().replace(/\s/g,''); 
-     var big =bigInt2str(str2bigInt(n.toString(),10,n.length),2);
+    var message = JSON.parse(sessionStorage.getItem('message'));
+    var res,res2, a,b,s = n.toString().replace(/\s/g,''); 
+    var big =bigInt2str(bigIntconv(n),2);
      //get the random true prime by using conversion of string to base 2
-     var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113];
+    var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113];
+    message.push('p will be tested for '+rounds.toString()+' rounds with a small base primes : [2;3;5..109;113]\n');
+    message.push('In addition; p will also be tested with random true prime ranging from 113 to n to strengthen the probability that p is a prime number\n');
      for (var k=0;k<rounds;k++) {
       a = smallPrimes[k];
-      if (s == ''+a) return true;
+      message.push('for a equals to : '+ a+'\n');
+      if (s == ''+a) {
+        message.push('p is a probable prime number with 99.9% confidence');
+        sessionStorage.setItem('message',JSON.stringify(message));
+        return true;
+      }
+      sessionStorage.setItem('message',JSON.stringify(message));
       res = RSA.Miller_Rabin.OneRound(s,a);
-      if (res.toString().indexOf('i')>0) return res;
+      if (res.toString().indexOf('i')>0) {
+        message = res;
+        sessionStorage.setItem('message',JSON.stringify(message));
+        return res;
+      }
       //testing against random true prime ABOVE 113
       if (s > smallPrimes[rounds-1]) {
         var rand = randTruePrime(big.length);
         //generate random true prime that is below input
-        b = parseInt(bigInt2str(rand,10)) % n;
-        if (s== ''+ b) return true;
+        b = mod(rand,bigIntconv(n));
+        message.push('for a equals to : '+ strconv(b)+'\n');
+        if (s ==''+ strconv(b)) {
+          message.push('p is a probable prime number with 99.9% confidence');
+          sessionStorage.setItem('message',JSON.stringify(message));
+          return true;
+        }
         if( b > smallPrimes[rounds-1]) res2 = RSA.Miller_Rabin.OneRound(s,b);
-        if (res2.toString().indexOf('i')>0) return res2;
-        if (res==0||res2==0 ) return false;
+        if (res2.toString().indexOf('i')>0){
+          message = res2;
+          sessionStorage.setItem('message',JSON.stringify(message));
+          return res2;
+        }
+        if (res==0||res2==0 ) {
+          message.push('since x is neither equals to 1 nor n-1 -> p is a composite number'); 
+          sessionStorage.setItem('message',JSON.stringify(message));
+          return false;
       }
       else{
-        if (res==0) return false;
+        if (res==0) {
+          message.push('since x is neither equals to 1 nor n-1 -> p is a composite number');
+          sessionStorage.setItem('message',JSON.stringify(message));
+          return false;
       }
      }
+     message.push('p is a probable prime number with 99.9% confidence');
+     sessionStorage.setItem('message',JSON.stringify(message));
      return true;
   }
 
@@ -449,105 +483,138 @@ RSA.Miller_Rabin.calc = function(a,i,n) {
   // takes BigInt a, i, n
   var one  = int2bigInt(1,1,1);
   var zero = int2bigInt(0,1,1);
-
+  var count = sessionStorage.getItem('count');
+  var message = JSON.parse(sessionStorage.getItem('message'));
+  var flag_init = sessionStorage.getItem('flag');
+  var flag_sub = sessionStorage.getItem('flag_sub');
   if (isZero(i)) return one;
+  
+  //for demo purpose
+  count++;
+  sessionStorage.setItem('count',count);
+  if (equalsInt(modInt(i,2),1)) {
+    if (flag_init) {
+      var d = strconv(dup(i));
+      flag_init = false;
+      sessionStorage.setItem('flag',flag_init);
+      message.push('to determine if p is a prime-> n-1 ('+ strconv(addInt(n,-1)) + ') is written as 2^s*d -> with s equals to '+count+' and d equals to '+ d +'\n');
+      sessionStorage.setItem('message',JSON.stringify(message));
+    }
+    if(flag_sub) {
+      flag_sub = false;
+      message.push('1. x = a^d mod n\n');
+      message.push('x = '+strconv(a)+'^'+d+' mod '+strconv(n)+'\n');
+      var x_test = powMod(a,d,n);
+      message.push('x = '+strconv(x_test)+'\n');
+       if (equalsInt(x ,1) || equals(x,addInt(n,- 1)) ){
+        message.push("x is equals to 1/n-1 -> choose another number\n");
+        sessionStorage.setItem('message',JSON.stringify(message));
+        continue;
+      }
+      for (var i = count; i--;) {
+        message.push('2. x = x * x % n \n');
+        message.push('x will be tested for '+count+' times\n');
+        message.push('x = '+strconv(x_test)+'*'+strconv(x_test)+' mod '+strconv(n)+'\n');
+        x_test = powMod(x_test,x_test,n);
+        message.push('x= '+strconv(x_test)+'\n');
+      }
+      sessionStorage.setItem('message',JSON.stringify(message));
+    }
+  }
   //  j = floor(i/2)
   var j = dup(i); divInt_(j,2);
   var x= RSA.Miller_Rabin.calc(a, j, n);
-
-  var x_arr = JSON.parse(sessionStorage.getItem('x'));
-  var y_arr = JSON.parse(sessionStorage.getItem('y'));
-
-  // x_arr[count1] = strconv(x); 
-  console.log(strconv(x));
-  x_arr.push(strconv(x));
-  console.log(x_arr);
-  sessionStorage.setItem('x',JSON.stringify(x_arr));
+  // console.log(strconv(i));
+  // console.log(strconv(x));
+  // var x_arr = JSON.parse(sessionStorage.getItem('x'));
+  // var y_arr = JSON.parse(sessionStorage.getItem('y'));
+  // x_arr.push(strconv(x));
+  // sessionStorage.setItem('x',JSON.stringify(x_arr));
   if (isZero(x)) {
-    sessionStorage.setItem('y',JSON.stringify(y_arr));
+    // sessionStorage.setItem('y',JSON.stringify(y_arr));
     return zero;
  }
   //  y = (x*x)%n
   var y = expand(x,n.length); squareMod_(y,n);
   if (equalsInt(y,1) && !equalsInt(x,1) && !equals(x, addInt(n,-1)) ){
     // y_arr[count1] = strconv(y);  
-    y_arr.push(strconv(y));   
-    sessionStorage.setItem('y',JSON.stringify(y_arr));
+    // y_arr.push(strconv(y));   
+    // sessionStorage.setItem('y',JSON.stringify(y_arr));
     return zero; 
   }
   //y = (y*a)%n -> y=(x*x*a)%number
   if (i[0]%2==1) multMod_(y,a,n);
-  y_arr.push(strconv(y));
-  sessionStorage.setItem('y',JSON.stringify(y_arr));
+  // y_arr.push(strconv(y));
+  // sessionStorage.setItem('y',JSON.stringify(y_arr));
   return y;
  }
 
-RSA.Miller_Rabin.calc_demo = function(n,k) {
-  //for step details purpose
-  // var message2 = sessionStorage.getItem('message');
-  var message = [];
-  if (n === 2 || n === 3){
-    message.push("since p is either 2/3 then p is a prime number.\n");
-    sessionStorage.setItem('message',message);
-    return true;
-  }
-  if (n % 2 === 0 || n < 2){
-    message.push("since p is even or p is less than 2 then p is a composite number.\n");
-    sessionStorage.setItem('message',message);
-    return false;
- }
-  // Write (n - 1) as 2^s * d
-  var s = 0, d = n - 1;
-  while (d % 2 === 0) {
-    d /= 2;
-    ++s;
-  }
-  var j = -1;
-  message.push('to determine if p is a prime-> n-1 ('+ (n - 1) + ') is written as 2^s*d -> with s equals to '+s+' and d equals to '+d+'\n');
-  message.push('p will be tested for '+k+' rounds with a small base primes : [2;3;5;etc]\n');
+// RSA.Miller_Rabin.calc_demo = function(n,k) {
+//   //for step details purpose
+//   // var message2 = sessionStorage.getItem('message');
+//   var message = [];
+//   if (n === 2 || n === 3){
+//     message.push("since p is either 2/3 then p is a prime number.\n");
+//     sessionStorage.setItem('message',message);
+//     return true;
+//   }
+//   if (n % 2 === 0 || n < 2){
+//     message.push("since p is even or p is less than 2 then p is a composite number.\n");
+//     sessionStorage.setItem('message',message);
+//     return false;
+//  }
+//   // Write (n - 1) as 2^s * d
+//   var s = 0, d = n - 1;
+//   while (d % 2 === 0) {
+//     d /= 2;
+//     ++s;
+//   }
+//   var j = -1;
+//   message.push('to determine if p is a prime-> n-1 ('+ (n - 1) + ') is written as 2^s*d -> with s equals to '+s+' and d equals to '+d+'\n');
+//   message.push('p will be tested for '+k+' rounds with a small base primes : [2;3;5;etc]\n');
 
-  WitnessLoop: do {
-    j++;
-    // A base between 2 and n - 2
+//   WitnessLoop: do {
+//     j++;
+//     // A base between 2 and n - 2
     
-    var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113];
-    if(j <= 30) var a = smallPrimes[j];
-    else{
-      message.push('cannot test higher than 30 rounds');
-      break;
-    }
-    if (a> n-2) break;
+//     var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113];
+//     if(j <= 30) var a = smallPrimes[j];
+//     else{
+//       message.push('cannot test higher than 30 rounds');
+//       break;
+//     }
+//     if (a> n-2) break;
 
-    message.push('for a equals to : '+ a+'\n');
-    var x = Math.pow(a, d) % n;
-    message.push('1. x = a^d mod n\n');
-    message.push('x = '+a+'^'+d+' mod '+n+'\n');
-    message.push('x = '+x+'\n');
-    console.log(x);
-    if (x === 1 || x === n - 1){
-      message.push("x is equals to 1/n-1 -> choose another number\n");
-      continue;
-    }
-    message.push('2. x = x * x % n \n');
-    message.push('x will be tested for '+s+' times\n');
-    for (var i = s; i--;) {
-      x = x * x % n;
-      message.push('x = '+x+'*'+x+' mod '+n+'\n');
-      message.push('x= '+x+'\n');
-      if (x === 1){
-        message.push("x is equals to 1 -> therefore p is a composite number\n");
-        sessionStorage.setItem('message',message);
-        return false;
-      }
-      if (x === n - 1)
-        continue WitnessLoop;
-    }
-    message.push('since x is neither equals to 1 nor n-1 -> p is a composite number');
-    sessionStorage.setItem('message',message);
-    return false;
-  } while (--k);
-  message.push('p is a probable prime number with 99.9% confidence');
-  sessionStorage.setItem('message',message);
-  return true;
-}
+//     message.push('for a equals to : '+ a+'\n');
+//     var x = Math.pow(a, d) % n;
+//     message.push('1. x = a^d mod n\n');
+//     message.push('x = '+a+'^'+d+' mod '+n+'\n');
+//     message.push('x = '+x+'\n');
+//     console.log(x);
+//     if (x === 1 || x === n - 1){
+//       message.push("x is equals to 1/n-1 -> choose another number\n");
+//       continue;
+//     }
+//     message.push('2. x = x * x % n \n');
+//     message.push('x will be tested for '+s+' times\n');
+//     for (var i = s; i--;) {
+//       x = x * x % n;
+//       message.push('x = '+x+'*'+x+' mod '+n+'\n');
+//       message.push('x= '+x+'\n');
+//       if (x === 1){
+//         message.push("x is equals to 1 -> therefore p is a composite number\n");
+//         sessionStorage.setItem('message',message);
+//         return false;
+//       }
+//       if (x === n - 1)
+//         continue WitnessLoop;
+//     }
+//     message.push('since x is neither equals to 1 nor n-1 -> p is a composite number');
+//     sessionStorage.setItem('message',message);
+//     return false;
+//   } while (--k);
+//   message.push('p is a probable prime number with 99.9% confidence');
+//   sessionStorage.setItem('message',message);
+//   return true;
+// }
 });
