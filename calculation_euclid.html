@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>FYP Project</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Stefan Artaputra Indriawan">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href=".\css\bootstrap.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href=".\css\sidebar.css">
+    
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  
+  <!-- Bootstrap Core JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- Big Integer JavaScript -->
+  <script src=".\js\BigInt.js"></script>
+
+  <!-- Bootstrap Sidebar Toggle JavaScript -->
+  <script src=".\js\javascript.js"></script>
+
+  <script>
+function goBack() {
+    window.history.back();
+}
+</script>
+
+
+</head>
+<body>
+        <!-- Sidebar -->        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper"> 
+          <button type="button" onclick="goBack()" class="hamburger is-closed">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+          </button>
+          <!-- p input -->  
+        <div class="container">
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="e_calc">public key exponent(e):</label>
+                <textarea class = 'form-control' rows="2" id = "e_calc"></textarea>
+              </div>
+            </div>
+
+              <!-- q input -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="Φn_calc">Φn:</label>
+                <textarea class = 'form-control' rows="2" id = "Φn_calc"></textarea>
+              </div>
+            </div>
+
+          </div>
+          <div class='row'>
+            <div class='col-md-3'>
+              <button type="button" class="btn btn-info"data-toggle="collapse" id="btn-Euclidcalc">Calculate</button>
+            </div>
+            <div class='col-md-6'></div>
+            <div class='col-md-3'>
+              <button type="button" class="btn btn-info"data-toggle="collapse" id="btn-show" href="#collapse">Show the steps</button>
+            </div>
+          </div>
+          <div class ="form-group"></div>
+
+          <!-- first step -->
+          <div id="collapse" class="collapse">
+            <div class="panel-group">
+              <div class="panel panel-info">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse1" >Steps for calculating private key exponent(d) by Extended Eucledian Algorithm</a>
+                  </h4>
+                </div>
+                <div id="collapse1" class="panel-collapse" >
+                  <div class="panel-body" id='step_euclid'>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+      </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+</body>
+</html>
