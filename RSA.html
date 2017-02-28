@@ -91,22 +91,27 @@
                     <h2>Please put your settings below:</h2>
                       <form >
                         <div class="form-group">
-                          <label for='input'>Range for prime number digits:</label>
+                          <label for='inputRange'>Range for prime number digits:(e.g. 5-15)</label>
                           <input type="text" class="form-control" id="inputRange">
+                          <div id = "alert_range"></div>  
                         </div>
                         <div class="form-group">
-                          <label for="inputSuccess">Number of 9 for 9 Confidence:</label>
+                          <label for="input9">Number of 9 for 9 Confidence(MAX 17):</label>
                           <input type="text" class="form-control" id="input9">
+                          <div id = "alert_confidence"></div>  
                         </div>
                         <div class="form-group">
-                          <label for="inputSuccess">Messages to be encrypted:</label>
-                          <input type="text" class="form-control" id="inputMessage">
+                          <label for="inputMessage">Messages to be encrypted:</label>
+                          <input type="text" class="form-control" id="inputMessage">  
                         </div>
                          <div class="form-group">
-                          <label for="inputSuccess">length of the splitter:</label>
-                          <input type="text" class="form-control" id="inputLength">                        </div>
+                          <label for="inputLength">length of the splitter:(e.g. 8)</label>
+                          <input type="text" class="form-control" id="inputLength">    
+                          <div id = "alert_splitter"></div>                      
+                        </div>
+                        <div id = "alert_general"></div>
                         <div class="form-group">
-                          <button type="button" class="btn btn-success btn-lg pull-right" href="#splitter " data-toggle="collapse" id="btn-input">Generate</button>
+                          <button type="button" class="btn btn-success btn-lg pull-right" href="#splitter " data-toggle="collapse" id="btn-input" disabled>Generate</button>
                         </div>
                       </form>
                   </section>
@@ -116,10 +121,10 @@
               <!-- splitter Section -->
               <section id='splitter' class='collapse'>
                 <div class="container">
-                  <div class="col-md-2"></div>
-                  <div class="col-md-8"> 
+                  <div class="col-md-0"></div>
+                  <div class="col-md-12"> 
                     <div class="panel panel-info"> 
-                      <div class="panel-heading">Explanation about Plaintext and Ciphertext</div>
+                      <div class="panel-heading">Explanation</div>
                       <div class="panel-body" id="splitted"></div>
                     </div>
                     <div class="form-group">
@@ -132,7 +137,7 @@
               <section id='result' class='collapse'>
                 <div class='container'>
                   <div class='row'>
-                    <div class='col-md-6'>
+                    <div class='col-md-5'>
                       <div class='row'>
                         <div class='col-md-6'>
                           <label for='cipher'>Ciphertext:</label>
@@ -186,14 +191,17 @@
 
                     </div>
                     
-                    <div class='col-md-6'>
-                    
+                    <div class='col-md-7'>
                       <div class='row'>
-                        <label for='encrypted'>Encrypted Message:</label>
+                        <label for='encrypted'>Converted Ciphertext:</label>
+                        <div class='well' id='converted'></div>
+                      </div>
+                      <div class='row'>
+                        <label for='encrypted'>Encrypted Message(For 1 Ciphertext):</label>
                         <div class='well' id='encrypted'></div>
                       </div>
                       <div class='row'>
-                        <label for='decrypted'>Decrypted Message:</label>
+                        <label for='decrypted'>Decrypted Message(For 1 Ciphertext):</label>
                         <div class='well' id='decrypted'></div>
                       </div>
                       <div class='row'>
