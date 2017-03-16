@@ -25,7 +25,7 @@
   <!-- Bootstrap Sidebar Toggle JavaScript -->
   <script src=".\js\javascript.js"></script>
 
-  <script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
+  <script src=".\js\BigInteger.min.js"></script>
 
   <script>
 function goBack() {
@@ -49,7 +49,7 @@ function goBack() {
           <div class="row">
             <div class="col-md-5">
               <div class="form-group">
-                <label for="p_calc">first modulo(p):</label>
+                <label for="p_calc">first prime number:</label>
                 <textarea class = 'form-control' rows="2" id = "p_calc"></textarea>
               </div>
             </div>
@@ -57,7 +57,7 @@ function goBack() {
               <!-- q input -->
             <div class="col-md-5">
               <div class="form-group">
-                <label for="q_calc">Second modulo(q):</label>
+                <label for="q_calc">Second prime number:</label>
                 <textarea class = 'form-control' rows="2" id = "q_calc"></textarea>
               </div>
             </div>
@@ -69,21 +69,17 @@ function goBack() {
                 <textarea class = 'form-control' rows="2" id = "num9"></textarea>
               </div>
             </div>
-
           </div>
-          <div class='row'>
-            <div class='col-md-3'>
+          
+            <div class='col-md-5'></div>
+            <div class='col-md-4'>
               <button type="button" class="btn btn-info"data-toggle="collapse" id="btn-MRcalc">Calculate</button>
-            </div>
-            <div class='col-md-6'></div>
-            <div class='col-md-3'>
-              <button type="button" class="btn btn-info"data-toggle="collapse" id="btn-show" href="#collapse" disabled>Show the steps</button>
             </div>
           </div>
           <div class ="form-group"></div>
 
           <!-- first step -->
-          <div id="collapse" class="collapse">
+          <div id="collapse" class="collapse" hide>
             <div class="panel-group">
               <div class="panel panel-info">
                 <div class="panel-heading">
@@ -118,7 +114,7 @@ function goBack() {
               <div class="panel panel-info">
                 <div class="panel-heading">
                   <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse2" >Steps for Miller Rabin calculation of modulo p</a>
+                    <a data-toggle="collapse" href="#collapse2" >Steps for Miller Rabin calculation of first prime number</a>
                   </h4>
                 </div>
                 <div id="collapse2" class="panel-collapse collapse" >
@@ -132,7 +128,7 @@ function goBack() {
               <div class="panel panel-info">
                 <div class="panel-heading">
                   <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse3">Steps for Miller Rabin calculation of modulo q</a>
+                    <a data-toggle="collapse" href="#collapse3">Steps for Miller Rabin calculation of second prime number</a>
                   </h4>
                 </div>
                 <div id="collapse3" class="panel-collapse collapse" >

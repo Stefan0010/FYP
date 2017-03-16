@@ -27,8 +27,7 @@
   <script src=".\js\javascript.js"></script>
 
   <!-- additional bigInt js  -->
-  <!-- delete if possible -->
-  <script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
+  <script src=".\js\BigInteger.min.js"></script>
 
 </head>
 
@@ -91,27 +90,27 @@
                     <h2>Please put your settings below:</h2>
                       <form >
                         <div class="form-group">
-                          <label for='inputRange'>Range for prime number digits:(e.g. 5-15)</label>
-                          <input type="text" class="form-control" id="inputRange">
+                          <label for='inputRange'>Range for prime number digits:(MAX 20)</label>
+                          <input type="text" class="form-control" id="inputRange" value="5-10">
                           <div id = "alert_range"></div>  
                         </div>
                         <div class="form-group">
                           <label for="input9">Number of 9 for 9 Confidence(MAX 17):</label>
-                          <input type="text" class="form-control" id="input9">
+                          <input type="text" class="form-control" id="input9" value="5">
                           <div id = "alert_confidence"></div>  
                         </div>
                         <div class="form-group">
                           <label for="inputMessage">Messages to be encrypted:</label>
-                          <input type="text" class="form-control" id="inputMessage">  
+                          <input type="text" class="form-control" id="inputMessage" value="testing RSA">  
                         </div>
-                         <div class="form-group">
+<!--                          <div class="form-group">
                           <label for="inputLength">length of the splitter:(e.g. 8)</label>
                           <input type="text" class="form-control" id="inputLength">    
                           <div id = "alert_splitter"></div>                      
-                        </div>
+                        </div> -->
                         <div id = "alert_general"></div>
                         <div class="form-group">
-                          <button type="button" class="btn btn-success btn-lg pull-right" href="#splitter " data-toggle="collapse" id="btn-input" disabled>Generate</button>
+                          <button type="button" class="btn btn-success btn-lg pull-right" href="#splitter " id="btn-input" disabled>Generate</button>
                         </div>
                       </form>
                   </section>
@@ -119,104 +118,124 @@
               </div>
               <!-- end input -->
               <!-- splitter Section -->
-              <section id='splitter' class='collapse'>
+              <section id='splitter' class='collapse' hide>
                 <div class="container">
-                  <div class="col-md-0"></div>
+                  <div class="col-md-12"></div>
                   <div class="col-md-12"> 
                     <div class="panel panel-info"> 
                       <div class="panel-heading">Explanation</div>
                       <div class="panel-body" id="splitted"></div>
                     </div>
                     <div class="form-group">
-                      <button type="button" class="btn btn-success btn-lg pull-right" href="#result" data-toggle="collapse" id="btn-exp">Next</button>
+                      <button type="button" class="btn btn-success btn-lg pull-right" href="#result" id="btn-exp">Next</button>
                     </div>
                   </div>
                 </div>
               </section>
-              <!-- Result Section -->
-              <section id='result' class='collapse'>
+
+             <!-- Result Section -->
+              <section id='result' class='collapse' hide>
                 <div class='container'>
                   <div class='row'>
-                    <div class='col-md-5'>
-                      <div class='row'>
-                        <div class='col-md-6'>
-                          <label for='cipher'>Ciphertext:</label>
-                          <div class='well' id='cipher'></div>                         
-                        </div>
-                        <div class='col-md-6'>
-                          <label for='e'>e:</label>
-                          <div class='well' id='e'></div>
-                        </div>
-                      </div>
-                      <div class='row'>
-                        <div class='col-md-6'>
-                          <label for='p'>p:</label>
-                          <div class='well' id='p'></div>                         
-                        </div>
-                        <div class='col-md-6'>
-                          <label for='q'>q:</label>
-                          <div class='well' id='q'></div>
-                        </div>
-                      </div>
-                      <div class='row'>
-                        <div class='col-md-6'>
-                          <label for='n'>n:</label>
-                          <div class='well' id='n'></div>                         
-                        </div>
-                        <div class='col-md-6'>
-                          <label for='Φn'>Φn:</label>
-                          <div class='well' id='Φn'></div>
-                        </div>
-                      </div>
-                      <div class='row'>
-                        <div class='col-md-12'>
-                          <label for='d'>d:</label>
-                          <div class='well' id='d'></div>
-                        </div>
-                      </div>
-                      <div class='row'>
-                        <div class='col-md-6'>
-                          <ul class="pager">
-                            <li><a href="./calculation.html" id="MRPager"><strong>>>Step details for Miller Rabin test</strong></a>
-                            </li>
-                          </ul>
-                        </div>
-                        <div class='col-md-6'>
-                          <ul class="pager">
-                            <li><a href="./calculation_euclid.html" id="DPager"><strong>>>Step Details for calculating d</strong></a>
-                            </li>
-                          </ul>    
-                        </div>
-                      </div>
-
+                    <div class='col-md-3'>
+                      <label for='cipher'>Ciphertext:</label>
+                      <div class='well' id='cipher'></div>   
+                    </div>                   
+                    <div class='col-md-1'>
+                      <label for='e'>e:</label>
+                      <div class='well' id='e'></div>
                     </div>
-                    
-                    <div class='col-md-7'>
-                      <div class='row'>
-                        <label for='encrypted'>Converted Ciphertext:</label>
-                        <div class='well' id='converted'></div>
-                      </div>
-                      <div class='row'>
-                        <label for='encrypted'>Encrypted Message(For 1 Ciphertext):</label>
-                        <div class='well' id='encrypted'></div>
-                      </div>
-                      <div class='row'>
-                        <label for='decrypted'>Decrypted Message(For 1 Ciphertext):</label>
-                        <div class='well' id='decrypted'></div>
-                      </div>
-                      <div class='row'>
-                        <label for='encryptedf'>Encrypted Full Message:</label>
-                        <div class='well' id='encryptedf'></div>
-                      </div>
-                      <div class='row'>
-                        <label for='decryptedf'>Decrypted Full Message:</label>
-                        <div class='well' id='decryptedf'></div>
-                      </div>
+                    <div class='col-md-4'>
+                      <label for='p'>p:</label>
+                      <div class='well' id='p'></div>                         
+                    </div>
+                    <div class='col-md-4'>
+                      <label for='q'>q:</label>
+                      <div class='well' id='q'></div>
+                    </div>
                   </div>
+                  <div class='row'>
+                    <div class='col-md-4'>
+                      <label for='n'>n:</label>
+                      <div class='well' id='n'></div>                         
+                    </div>
+                    <div class='col-md-4'>
+                      <label for='Φn'>Φn:</label>
+                      <div class='well' id='Φn'></div>
+                    </div>
+                    <div class='col-md-4'>
+                      <label for='d'>d:</label>
+                      <div class='well' id='d'></div>
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-md-4'>
+                      <label for='encrypted'>Converted Ciphertext:</label>
+                      <div class='well' id='converted'></div>
+                    </div>
+                    <div class='col-md-4'>
+                      <label for='encrypted'>Encrypted Message(For 1 Ciphertext):</label>
+                      <div class='well' id='encrypted'></div>
+                    </div>
+                    <div class='col-md-4'>
+                      <label for='decrypted'>Decrypted Message(For 1 Ciphertext):</label>
+                      <div class='well' id='decrypted'></div>
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <label for='encryptedf'>Encrypted Full Message:</label>
+                    <div class='well' id='encryptedf'></div>
+                  </div>
+                  <div class='row'>
+                    <label for='decryptedf'>Decrypted Full Message:</label>
+                    <div class='well' id='decryptedf'></div>
+                  </div>
+              
+                  <div class='row'>
+                    <div class='col-md-0'></div>
+                    <div class='col-md-4'>
+                      <ul class="pager">
+                        <li><a href="#CRT" id="CRTPager"><strong>>>Alternative Solution to decrypt using CRT</strong></a>
+                        </li>
+                      </ul>    
+                    </div>
+                    <div class='col-md-0'></div>
+                    <div class='col-md-4'>
+                      <ul class="pager">
+                        <li><a href="./calculation_euclid.html" id="DPager"><strong>>>Step Details for calculating d</strong></a>
+                        </li>
+                      </ul>    
+                    </div>
+                    <div class='col-md-0'></div>
+                    <div class='col-md-4'>
+                      <ul class="pager">
+                        <li><a href="./calculation.html" id="MRPager"><strong>>>Step details for Miller Rabin test</strong></a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div >
                 </div>
-
               </section> 
               <!-- end of result -->
+
+              <!-- Result Section -->
+              <section id='CRT' class='collapse' hide>
+                <div class= "container">
+                  <div class="col-md-12"></div>
+                  <div class="col-md-12"> 
+                    <div class="panel panel-info"> 
+                      <div class="panel-heading">Explanation using normal RSA calculation</div>
+                      <div class="panel-body" id="norm_exp"></div>
+                    </div>
+                  </div>
+                  <div class="col-md-12"> 
+                    <div class="panel panel-info"> 
+                      <div class="panel-heading">Explanation using CRT</div>
+                      <div class="panel-body" id="CRT_exp"></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
         </div>
         <!-- /#page-content-wrapper -->
 

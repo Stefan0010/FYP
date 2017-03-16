@@ -1,8 +1,33 @@
-$(document).ready(function () {
-  var trigger = $('.hamburger'),
-      overlay = $('.overlay'),
+//TODO ASAP fix the miller rabin explanation
+//preserve THE HTML STATE
+//use pager instead of button on rsa?
+//min for range
 
-      button_inp = $('#btn-input'),
+//DONE constraint in d page
+// confidence in miller rabin page
+// some text enchancements
+// get length dynamically
+//make the 3rd party lib locally
+//add random number~~
+//------
+//say total random prime, then list some of them
+//implement the prime random 1 at a time, not both of them
+//create explanation for normal also !!!
+//FIXED BUG
+
+//NEED TO BE TESTED
+//create CRT - done, not tested
+//init value  
+
+//BUG:
+// INPUT 1-2 2 AW
+// range << text???
+$(document).ready(function () {
+
+  var trigger = $('.hamburger'),
+      overlay = $('.      button_inp = $('#btn-input'),
+overlay'),
+
       button_exp = $('#btn-exp'),
       button_key = $('#btn-keygen'),
       button_enc = $('#btn-encrypt'),
@@ -11,6 +36,8 @@ $(document).ready(function () {
       button_conv = $('#btn-conv'),
       button_MRcalc = $('#btn-MRcalc'),
       button_show=$('#btn-show'),
+      button_CRT = $('#btn-CRT'),
+      button_rand = $('#btn-CRTR'),
       button_euclid = $('#btn-Euclidcalc'); 
 
       //rabbin miller demo purposes
@@ -27,42 +54,62 @@ $(document).ready(function () {
   sessionStorage.setItem('message',JSON.stringify(MRMessage));
   sessionStorage.setItem('euclid',EuclidMessage);
 
+  //to enable generate when come back from other html
+  if($('#inputRange').length != 0 && $('#input9').length != 0 && $('#inputMessage').length != 0){
+    var inputRange =$('#inputRange').val(),
+        input9 =$('#input9').val(),
+        inputMessage =$('#inputMessage').val();
+
+    if(inputRange.length !==0 || input9.length !== 0|| inputMessage.length !== 0 ){
+      button_inp.prop('disabled',false);
+    }
+  }
+
+  // if($('#splitter').length !=0 &&$('#result').length !=0) {
+  //   var flag_exp = localStorage.getItem('flag_exp');
+  //   var flag_res = localStorage.getItem('flag_res') ;
+  //   if (flag_exp == true) {
+  //     $('#splitter').show();
+  //   }
+  //   if (flag_res == true) {
+  //     $('#result').show();
+  //   }
+  // }
 
    button_inp.click(function() {
-    $('#result').hide();  
-    bootstrap_alert.explanation();
-
-    var ciphertext = split_cipher($('#inputMessage').val(),parseInt($('#inputLength').val()));
+    // localStorage.setItem('flag_exp',true);
+     
+    var flag = bootstrap_alert.explanation();
+    if (flag == false){
+      $('#splitter').hide();
+      $('#result').hide(); 
+      return false;
+    }
+    else {
+      $('#splitter').show();
+      bootstrap_alert.fade('#alert_general  ');
+    } 
+    var length = sessionStorage.getItem('length');
+    var ciphertext = split_cipher($('#inputMessage').val(),parseInt(length));
     var numof9 = parseInt($('#input9').val());
     var round = RSA.Miller_Rabin.confidence(numof9);
-    var primes = bigInt(RSA.Miller_Rabin.Prime($('#inputRange').val(),round));
-    var e = RSA.gcd(primes[0],primes[1]);
-    var calc = RSA.calc(e,primes[0],primes[1],ciphertext[0]);
+    var prime1 = sessionStorage.getItem('prime1');
+    var prime2 = sessionStorage.getItem('prime2');
+    var e = RSA.gcd(prime1,prime2);
+    var calc = RSA.calc(e,prime1,prime2,ciphertext[0]);
     var enc = '';
     var dec ='';
     var convert = RSA.convert_text(ciphertext[0]);
-    var tag_out = '#alert_general';
-    var message = 'please select higher range/lower splitter length as n is lower than the converted splitted ciphertext!';
 
-    sessionStorage.setItem('p',bigInt(primes[0]).toString());
-    sessionStorage.setItem('q',bigInt(primes[1]).toString());
+    RSA.CRT(bigInt(prime1),bigInt(prime2),bigInt(calc[2]),bigInt(calc[3]));
+
     sessionStorage.setItem('e',e);
-    sessionStorage.setItem('Φn',calc[1]);
+    sessionStorage.setItem('Φn',calc[1].toString());
     sessionStorage.setItem('num9',numof9);
 
-    if(bigInt(calc[0]).lesser(bigInt(RSA.convert_text(ciphertext[0]).toString())) == true){
-      bootstrap_alert.warning(tag_out,message);
-      $('#result').hide();
-      $('#splitter').hide();
-    }
-    else {
-      bootstrap_alert.fade(tag_out);
-      $('#splitter').show();
-    }
-
     $('#e').text(e);
-    $('#p').text(primes[0]);
-    $('#q').text(primes[1]);
+    $('#p').text(prime1.toString());
+    $('#q').text(prime2.toString());
     $('#n').text(calc[0]);
     $('#Φn').text(calc[1]);
     $('#d').text(calc[2]);
@@ -72,37 +119,45 @@ $(document).ready(function () {
     $('#decrypted').text(calc[4]);
 
     for (var i = 0; i<ciphertext.length;i++){
-      enc += RSA.calc(e,primes[0],primes[1],ciphertext[i])[3].toString();
-      dec += RSA.calc(e,primes[0],primes[1],ciphertext[i])[4].toString();
+      enc += RSA.calc(e,prime1,prime2,ciphertext[i])[3].toString();
+      dec += RSA.calc(e,prime1,prime2,ciphertext[i])[4].toString();
     }
 
     $('#encryptedf').text(enc);
-    $('#decryptedf').text(dec);    
+    $('#decryptedf').text(dec);
+    // return true;    
    });
 
    button_exp.click(function() {
+    // localStorage.setItem('flag_res',true);
     $('#result').show();
+    // return true; 
    })
 
     // sync the input from rsa to calc html
     if (document.getElementById("p_calc") != null && document.getElementById("q_calc") != null) {
-      document.getElementById("p_calc").value = (sessionStorage.getItem('p'));  
-      document.getElementById("q_calc").value = (sessionStorage.getItem('q'));
-      document.getElementById("num9").value = (sessionStorage.getItem('num9'));
+      if(sessionStorage.getItem('prime1') != null && sessionStorage.getItem('prime2') != null && sessionStorage.getItem('num9') != null){
+        document.getElementById("p_calc").value = (sessionStorage.getItem('prime1')).toString();  
+        document.getElementById("q_calc").value = (sessionStorage.getItem('prime2')).toString();
+        document.getElementById("num9").value = (sessionStorage.getItem('num9'));
+      }
     }
 
     // sync the input from rsa to calc_euclid html
     if (document.getElementById("e_calc") != null && document.getElementById("Φn_calc") != null) {
-      document.getElementById("e_calc").value = (sessionStorage.getItem('e'));  
-      document.getElementById("Φn_calc").value = (sessionStorage.getItem('Φn'));
+      if(sessionStorage.getItem('e') != null && sessionStorage.getItem('Φn') != null){
+        document.getElementById("e_calc").value = (sessionStorage.getItem('e'));  
+        document.getElementById("Φn_calc").value = (sessionStorage.getItem('Φn'));
+      }
     }
 
     button_MRcalc.on('click',function(){
-      $('#btn-show').prop('disabled',false);
-      $('#collapse').collapse('hide');
-      $('#collapse1').collapse('hide');
-      $('#collapse2').collapse('hide');
-      $('#collapse3').collapse('hide');
+       $('#collapse').show();
+      // $('#btn-show').prop('disabled',false);
+      // $('#collapse').collapse('hide');
+      // $('#collapse1').collapse('hide');
+      // $('#collapse2').collapse('hide');
+      // $('#collapse3').collapse('hide');
 
       var p =$('#p_calc').val();
       var q =$('#q_calc').val();
@@ -134,18 +189,20 @@ $(document).ready(function () {
         index++;
     }
     //fix the regex later
-    var res = para_q.replace(/[\b*p\b*]/,'q');
+    var res = para_q.replace(/[\b+p\b+]/,'q');
     $('#step_q').html('<pre>'+res+'</pre>');
      });
     
   // give restriction as well for the input, especially e w.r.t tao
   // add gcd steps? later on
    button_euclid.on('click',function() {
-      $('#btn-show').prop('disabled',false);
-      $('#collapse').collapse('hide');
-      $('#collapse1').collapse('hide');
+      
+      // $('#btn-show').prop('disabled',false);
+      // $('#collapse').collapse('hide');
+      // $('#collapse1').collapse('hide');
       var e =bigInt($('#e_calc').val());
       var Φn =bigInt($('#Φn_calc').val());
+      
       sessionStorage.setItem('euclid',EuclidMessage);
       var message = "The Extended Euclidean algorithm(EED) is essentially the Euclidean algorithm (for GCD's) ran backwards.\n" +
                     "The goal by using EED is to find private key exponent(d) such that e*d ≡ 1(modφ(n)).\n\n" +
@@ -159,7 +216,20 @@ $(document).ready(function () {
                     "The toString() of y does not actually matter, since it will get eliminated modulo φ((n) regardless of its toString().\n\n" +
                     "Thus, for e= "+e.toString()+" ,and Φn= "+Φn.toString()+" :(GCD steps first, then EED)\n";
       sessionStorage.setItem('euclid',message);
+      
       var d = RSA.Euclid_gcd(Φn,e);
+      if (d[2] != 1) {
+         $('#collapse').hide();
+        bootstrap_alert.warning('#alert_euclid','the GCD for Φn and e is not 1, can\'t find the inverse!!');
+      }
+      else if(e<3 || bigInt(e).greater(bigInt(Φn)) == true){
+         $('#collapse').hide();
+        bootstrap_alert.warning('#alert_euclid','e must be bigger than 3, and lower than Φn!!');
+      }
+      else {
+        bootstrap_alert.fade('#alert_euclid');
+        $('#collapse').show();
+      }
       var temp = Φn.plus(d[1]);
       var message = sessionStorage.getItem('euclid');
       message +="From the EED above, we can conclude that x = " + d[1].toString() +", which is in fact d= "+ temp.toString() +" before modded by " + Φn.toString() +".\n\n" +
@@ -167,12 +237,17 @@ $(document).ready(function () {
       "back into the final equation (the one which equals 1) which gives the desired linear combination.";
       $('#step_euclid').html('<pre>'+message+"<pre>");
     });
+  
+  $('#CRTPager').on('click',function() {
+    $('#CRT').show();
+    bootstrap_alert.CRT();
+    bootstrap_alert.norm();
+  });
 
   $('#inputRange').keyup(function() {
     var inputRange =$('#inputRange').val(),
         input9 =$('#input9').val(),
         inputMessage =$('#inputMessage').val(),
-        inputLength =$('#inputLength').val(),
         regex_range = /^(\d)*-(\d)*$/,
         tag_out = '#alert_range',
         message = 'Please input an integer!';
@@ -186,7 +261,7 @@ $(document).ready(function () {
       button_inp.prop('disabled',false);
     }
 
-    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 || inputLength.length === 0){
+    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 ){
       button_inp.prop('disabled',true);
     }
     // else{
@@ -197,7 +272,6 @@ $(document).ready(function () {
     var inputRange =$('#inputRange').val(),
         input9 =$('#input9').val(),
         inputMessage =$('#inputMessage').val(),
-        inputLength =$('#inputLength').val(),
         regex_range = /^(\d)+-(\d)+$/,
         tag_out = '#alert_range',
         message = 'Please input an integer!';
@@ -216,7 +290,7 @@ $(document).ready(function () {
       bootstrap_alert.fade(tag_out);
       button_inp.prop('disabled',false);
     }
-    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 || inputLength.length === 0){
+    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0){
       button_inp.prop('disabled',true);
     }
     // else{
@@ -228,7 +302,6 @@ $(document).ready(function () {
     var inputRange =$('#inputRange').val(),
         input9 =$('#input9').val(),
         inputMessage =$('#inputMessage').val(),
-        inputLength =$('#inputLength').val(),
         regex = /\D/,
         tag_out = '#alert_confidence',
         message = 'Please input an integer!';
@@ -247,7 +320,7 @@ $(document).ready(function () {
       button_inp.prop('disabled',false);
     }
 
-    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 || inputLength.length === 0){
+    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0){
       button_inp.prop('disabled',true);
     }
     // else{
@@ -259,11 +332,10 @@ $(document).ready(function () {
     var inputRange =$('#inputRange').val(),
         input9 =$('#input9').val(),
         inputMessage =$('#inputMessage').val(),
-        inputLength =$('#inputLength').val(),
         regex = /\D/,
         tag_out = '#alert_confidence',
         message = 'Please input an integer!';
-    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 || inputLength.length === 0){
+    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0){
       button_inp.prop('disabled',true);
     }
     else{
@@ -271,36 +343,38 @@ $(document).ready(function () {
     }
   })
 
-  $('#inputLength').keyup(function() {
-      var inputRange =$('#inputRange').val(),
-          input9 =$('#input9').val(),
-          inputMessage =$('#inputMessage').val(),
-          inputLength =$('#inputLength').val(),
-          regex = /\D/,
-          tag_out = '#alert_splitter',
-          message = 'Please input an integer!';
-      
+  $('#MRPager').on('click',function() {
+    sessionStorage.setItem('prime1',$('#p').text());
+    sessionStorage.setItem('prime2',$('#q').text());
+  })
 
-      if(isNaN(inputLength) || regex.exec(inputLength) !== null){
-        bootstrap_alert.warning(tag_out,message);
-        button_inp.prop('disabled',true);
-      }
-      else if (parseInt(inputLength) > inputMessage.length){
-        message="cannot exceed length of the message!";
-        bootstrap_alert.warning(tag_out,message);
-        button_inp.prop('disabled',true);
-      }
-      else {
-        bootstrap_alert.fade(tag_out);
-        button_inp.prop('disabled',false);
-      }
-      if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 || inputLength.length === 0){
-        button_inp.prop('disabled',true);
-      }
-      // else{
-      //   button_inp.prop('disabled',false);
-      // }
+  $('#splitted').on('click','a.link', function (e) {
+      // e.preventDefault();
+      //Get the id of parent container of anchor tag here
+      // alert(this.parentNode.id);
+      var tag = this.parentNode.id;
+      var primerand = ($('#'+tag).text()).trim();
+      sessionStorage.setItem('prime1',primerand);
+      sessionStorage.setItem('prime2',0);
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -445,6 +519,7 @@ $(document).ready(function () {
 
    //for MR demo button
 
+  
 
 
   
@@ -499,9 +574,93 @@ $('[data-toggle="offcanvas"]').click(function () {
     for (var i =0;i<num;i++){
       per +=9;
     }
+    if (num<2) num = 2;
     var temp = (parseFloat(per) * 100).toFixed(num-2);
     per = temp.toString() +'%';
     return per;
+  }
+
+  // function getLength(n,msg) {
+  //   // console.log('hai starting');
+  //   var flag = false;
+  //   if (!bigInt.isInstance(n)) var p =bigInt(n);
+  //   else var p = n;
+  //   for(var i=1;i<msg.length;i++){
+  //     var split = split_cipher(msg,i);
+  //     var enc = RSA.convert_text(split[0]);
+  //     if(p.lesser(bigInt(enc))){
+  //       console.log('aa');
+  //       flag = true;
+  //       break;
+  //     }
+  //   }
+  //   if (flag == false){
+  //     var tag = '#alert_general';
+  //     var message = 'range for prime inputted are less than the range for the converted message! Please select the new range';
+  //     bootstrap_alert.warning(tag,message);
+  //     return false;
+  //   }
+  //   var cand = i-1;
+  //   var j = 0;
+  //   while(cand > 0){
+  //     if (j < split.length){
+  //       var split = split_cipher(msg,cand);
+  //       var enc = RSA.convert_text(split[j]);
+  //       var bool = p.lesser(bigInt(enc));
+  //       // console.log(p.toString());
+  //       // console.log(enc);
+  //       if (bool==true) {
+  //         cand -=1;
+  //         j = -1;
+  //       }
+  //       j++;
+  //     }
+  //     else break;
+  //   }
+  //   return true;
+  //   sessionStorage.setItem('length',cand);
+  // }
+  // if (j < split.length){
+
+  function getLength(n,msg) {
+    // console.log('hai starting');
+    if (!bigInt.isInstance(n)) var p =bigInt(n);
+    else var p = n;
+    for(var i=1;i<msg.length;i++){
+      var split = split_cipher(msg,i);
+      var enc = RSA.convert_text(split[0]);
+      if(p.lesser(bigInt(enc))){
+        
+        break;
+      }
+    }
+    var cand = i-1;
+    var j =0;
+    var temp = split;
+    while(cand > 0){
+      if (j < temp.length){
+        var split = split_cipher(msg,cand);
+        var enc = RSA.convert_text(split[j]);
+        var bool = p.lesser(bigInt(enc));
+        // console.log(p.toString());
+        // console.log(enc);
+        if (bool==true) {
+          cand -=1;
+          j = 0;
+        }
+        j++;
+      }
+      else break;
+    }
+    console.log(cand);
+    if (cand <= 0){
+      var tag = '#alert_general';
+      var message = 'range for prime inputted are less than the range for the converted message! Please select the new range';
+      bootstrap_alert.warning(tag,message);
+      return false;
+    }
+    sessionStorage.setItem('length',cand);
+    return true;
   }
 
   bootstrap_alert = function() {}
@@ -519,31 +678,95 @@ $('[data-toggle="offcanvas"]').click(function () {
 
   bootstrap_alert.explanation = function() {
     var cipher = $('#inputMessage').val();
-    var split = parseInt($('#inputLength').val());
-    var arr = split_cipher(cipher,split);
+    // var split = parseInt($('#inputLength').val());
     var numof9 = $('#input9').val();
     var round = RSA.Miller_Rabin.confidence(numof9);
+    var primes = bigInt(RSA.Miller_Rabin.Prime($('#inputRange').val(),round));
+    sessionStorage.setItem('prime1',primes[0]);
+    sessionStorage.setItem('prime2',primes[1]);
+    var n =bigInt(primes[0].toString()).multiply(primes[1].toString());
+    var flag = getLength(n,cipher);
+    if (flag == false) return false;
+    var split = sessionStorage.getItem('length');
+    var arr = split_cipher(cipher,parseInt(split));
+    
+    var numof9 = $('#input9').val();
     var degree = convertconf(numof9);
+    var count = sessionStorage.getItem('prime_count');
     sessionStorage.setItem('degree',degree);
-    var message ="With the Plaintext\n(" + cipher +"),\nit will be splitted into several Ciphertexts,each with length of "+ split + ".\n";
+    var message ="With the Plaintext (" + cipher +"),\nit will be splitted into several Ciphertexts,each with length of "+ split + ".";
     message += "Thus, the Plaintext would be splitted into:\n";
     for (var i = 0; i<arr.length;i++) {
       message += arr[i] + ";\n" ;
     }
     message +="\n";
     message +="Since the number of 9 for the confidence is "+ numof9 +",This means that it will be tested for "+round+" rounds,\n";
-    message +="For the 2 modulos(p and q) to be at least "+ degree +" that it is a prime.\n";
+    message +="For the 2 big prime numbers to be at least "+ degree +" that it is a prime.\n";
+    message +="From the parameter inputted above, the total random number that are tested are: " + count + ".\nFor the demo purposes, only the max. of 10 numbers are displayed.\nThese are the random numbers that are failed to pass the Miller-Rabin algorithm test:\n";
+    var res =sessionStorage.getItem('failrandom');
+
+    res = res.split(',');
+    var length = res.length;
+    for (var i = 0 ; i<res.length;i++){
+      message += "<div id='div"+i+"'>\n";
+      message += "<a href='./calculation.HTML' class='link'>"+res[i] + '</a>\n';
+      message +="</div>\n";
+    }
     message +="\n==================================================================================================================\n";
     message +="Help section";
     message +="\n==================================================================================================================\n";
-    message +="The details below will explain about how the program calculate public and private key pair\n for the first splitted ciphertext.\n";
-    message +="by clicking next, it will generate public key exponent(e), modulo p and q, \nn, tao(n), and private key epxonent(d) based on parameter inputted before.\n\n";
+    message +="The details below will explain about how the program calculate public and private key pair\nfor the first splitted ciphertext.\n";
+    message +="Clicking next will generate public key exponent(e),two big prime numbers, n, tao(n), and private key exponent(d)\nbased on parameter inputted before.\n\n";
     message +="Some informations regarding the generated variables:\n";
     message +="<Strong>e will already have 1 as the greatest common divisor with tao(n),\n</Strong>";
     message +="<Strong>p and q will already be prime numbers with certain confidence based on the parameter,\n</Strong>";
     message +="<Strong>d is already a multiplicative inverse of e,\n</Strong>";
     message +="<Strong>n will already be bigger than any particular converted Ciphertext.\n</Strong>";
     $('#splitted').html('<div class="panel-body" id="splitted"><pre>'+ message +'</pre></div>');
+    return true;
+  }
+
+  bootstrap_alert.CRT = function() {
+    var p = $('#p').text();
+    var q = $('#q').text();
+    var d = $('#d').text();
+    var enc = $('#encrypted').text();
+    var arr = RSA.CRT(bigInt(p),bigInt(q),bigInt(d),bigInt(enc));
+    var message = "Using normal RSA procedure (using (encrypted cipher)^d mod n) to decrypt directly \n are pretty difficult to calculate when the number is really big.\n";
+    message +="By using Chinese Remainder Theorem, the exponent and modulus value can be broken down to be much smaller and more manageable.\n";
+    message +="The example below demonstrates how CRT gives alternating in RSA calculation by breaking it down into 2 smaller parts.\n";
+    message +="dP = d mod (p-1) = "+ d + " mod " + bigInt(bigInt(p).minus(1)).toString() + " = " + arr[0] +"\n" ;
+    message +="dQ = d mod (q-1) = "+ d + " mod " + bigInt(bigInt(q).minus(1)).toString() + " = " + arr[1] +"\n" ;
+    message +="qInv = (q)^-1 mod (p) = ("+ q + ")^-1 mod " + p + " = " + arr[2] +"\n" ;
+    message +="m1 = (encrypt)^dP mod (p) = ( "+ enc + " )^"+arr[0]+" mod " + p + " = " + arr[3] +"\n" ;
+    message +="m2 = (encrypt)^dQ mod (q) = ( "+ enc + " )^"+arr[1]+" mod " + q + " = " + arr[4] +"\n" ;
+    message +="h = qInv*(m1-m2 + p) mod (p) = "+ arr[3] + "*( "+arr[3]+ " - "+ arr[4] + " + " + p +") mod " + p + " = " + arr[5] +"\n" ;
+    message +="m = m2 +h*q = "+ arr[4] +" + " + arr[5] +" * " + q + " = " + arr[6] + "\n";
+    message +="This gives the same result as the normal RSA decryption method, and its easier to compute with this method rather than the usual way.\n";
+    $('#CRT_exp').html('<div class="panel-body" id="CRT_exp"><pre>'+ message +'</pre></div>');
+  }
+
+  bootstrap_alert.norm = function() {
+    var p = $('#p').text();
+    var q = $('#q').text();
+    var d = $('#d').text();
+    var enc = $('#encrypted').text();
+    var e = $('#e').text();
+    var n = $('#n').text();
+    var tao =$('#Φn').text();
+    var cipher = $('#cipher').text();
+    var convert = $('#converted').text();
+    var dec= $('#decrypted').text();
+    var message ="The RSA algorithm involves four steps: key generation, key distribution, encryption and decryption.\n";
+    message +="The keys for the RSA algorithm are generated the following way:\n";
+    message +="After getting 2 big prime numbers from the range specified ("+p+" , "+q+") using Miller Rabin Primality test,\nwe then can calculate n = p*q = "+n +" .\n";
+    message +="Next, Φ(n) can be computed by : (p-1)*(q-1) = "+tao+" .\n";
+    message +="Then, with the choosen e = "+e+",where e and  Φ(n) are coprime,\nd can be computed as d is the multiplicative inverse of e modulo( Φ(n)).\n";
+    message +="d = "+d+" . With these, we have generated public key pair(n,e) and private key pair(d,n).\n";
+    message +="With c = m^e(mod n) as the encryption formula, where m is the message("+convert+"),\nand c is the encrypted text, the value of c is = "+enc+" .\n";
+    message +="One can decipher the message from c by using c^d(mod n) formula,\nin this case the decrypted value would be: "+dec+" .\n";
+    message +="the recovered message can be converted back to text, which would be = "+cipher+".\n";
+    $('#norm_exp').html('<div class="panel-body" id="CRT_exp"><pre>'+ message +'</pre></div>');
   }
 
   function bigIntconv(num){
@@ -613,6 +836,26 @@ $('[data-toggle="offcanvas"]').click(function () {
     }
   }
 
+  RSA.CRT = function(i_p,i_q,d,encrypt) {
+    if(bigInt(i_p).gt(bigInt(i_q))) {
+      p=i_p;
+      q=i_q;
+    }
+    else{
+      p=i_q;
+      q=i_p;
+    }
+    
+    var dP = d.mod(p.minus(1));
+    var dQ = d.mod(q.minus(1));
+    var qInv = q.modInv(p);
+    var m1 = encrypt.modPow(dP,p);
+    var m2 = encrypt.modPow(dQ,q);
+    var h = (qInv.multiply(m1.minus(m2).plus(p))).mod(p);
+    var m = m2.plus(h.multiply(q));
+    return [dP.toString(),dQ.toString(),qInv.toString(),m1.toString(),m2.toString(),h.toString(),m.toString()];
+  }
+
   //reinforce conversion
   RSA.convert_text=function(m) {
     var enc="",
@@ -625,33 +868,6 @@ $('[data-toggle="offcanvas"]').click(function () {
     return enc;
   }
 
-  //reinforce verify since we use bigInt
-  // RSA.verify = function() {
-  //   var range =  $('#inputRange').val(),
-  //       numof9 =  $('#input9').val(),
-  //       length =  $('#inputLength').val(),
-  //       regex_range = /^(\d)*-(\d)*$/,
-  //       regex = /\D/,
-  //       tag_out = '#alert_integer',
-  //       message = 'Please input an integer!';
-  //   if(isNaN(length) || regex.exec(length) !== null){
-  //     tag_out = '#alert_splitter';
-  //     boostrap_alert.warning(tag_out,message);
-  //   }
-  //   else
-
-
-  //   if ( isNaN(e)|| isNaN(p) || isNaN(q) || regex.exec(e) !== null || regex.exec(p) !== null || regex.exec(q) !== null) {
-  //     bootstrap_alert.warning(tag_out,message);
-  //     return false;
-  //   }
-  //   else {
-  //     bootstrap_alert.fade(tag_out);
-  //     return true;
-  //   }
-
-  // }
-  
   
   RSA.clean = function() {
     //reset toString() before doing another MR
@@ -671,23 +887,86 @@ $('[data-toggle="offcanvas"]').click(function () {
   }
 
   //using old bigInt.js
+  // RSA.Miller_Rabin.Prime = function(range,round){
+  //   var arr = range.split('-');
+
+  //   // if (arr[0] < )
+  //   var i =0;
+  //   var res =[];
+  //   while(true){
+  //     var length = Math.floor(Math.random() * (parseInt(arr[1])-parseInt(arr[0])) + parseInt(arr[0]));
+  //     var p = Math.floor(Math.pow(10, length-1) + Math.random() * 9 * Math.pow(10, length-1));
+  //     var q = Math.floor(Math.pow(10, length-1) + Math.random() * 9 * Math.pow(10, length-1));
+
+  //     if( bigInt(p).equals(bigInt(q)) == true) continue;
+
+  //     else if(bigInt(p).isDivisibleBy(2) || bigInt(p).isDivisibleBy(5) || bigInt(q).isDivisibleBy(2) || bigInt(q).isDivisibleBy(5)) continue;
+  //     // if(bigInt(p).isProbablePrime() == true && bigInt(q).isProbablePrime() == true)
+  //     else{
+  //     // var rand ='';
+  //     // for (var i = 0; i<length;i++) rand +='9';
+  //     // var big = bigInt2str(bigIntconv(rand),2);
+  //     // var p = randProbPrime(big.length);
+  //     // var q = randProbPrime(big.length);
+  //       // console.log(p.toString());
+  //       // console.log(q.toString());
+  //       if (i<10){
+  //         var message = bigInt(p).toString() + '&' + bigInt(q).toString();
+  //         res[i] = message;
+  //         i++;
+  //       }
+  //       RSA.clean();
+  //       var mes_p = RSA.Miller_Rabin.MultiRounds(p.toString(),round);
+  //       RSA.clean();
+  //       var mes_q = RSA.Miller_Rabin.MultiRounds(q.toString(),round);
+  //       if(mes_p == true && mes_q == true ) break;
+  //     }
+  //   }
+  //   sessionStorage.setItem('failrandom',res);
+  //   return [p.toString(),q.toString()];
+  // }
+
   RSA.Miller_Rabin.Prime = function(range,round){
     var arr = range.split('-');
 
+    var i =0;
+    var res =[];
+    var count = 0;
+    var q_flag = false;
     while(true){
       var length = Math.floor(Math.random() * (parseInt(arr[1])-parseInt(arr[0])) + parseInt(arr[0]));
-      var rand ='';
-      for (var i = 0; i<length;i++) rand +='9';
-      var big = bigInt2str(bigIntconv(rand),2);
-      var p = randTruePrime(big.length);
-      var q = randTruePrime(big.length);
-      RSA.clean();
-      var mes_p = RSA.Miller_Rabin.MultiRounds(strconv(p),round);
-      RSA.clean();
-      var mes_q = RSA.Miller_Rabin.MultiRounds(strconv(q),round);
-      if(mes_p == true && mes_q == true) break;
+      var rand = Math.floor(Math.pow(10, length-1) + Math.random() * 9 * Math.pow(10, length-1));
+
+      if(bigInt(rand).isDivisibleBy(2) || bigInt(rand).isDivisibleBy(5) || bigInt(rand).lesser(2)) continue;
+
+      else{
+        count++;
+        RSA.clean();
+        var rand_flag = RSA.Miller_Rabin.MultiRounds(rand.toString(),round);
+        if(rand_flag == true && q_flag == false) {
+          var p = rand;
+          q_flag = true;
+        }
+        else if(rand_flag == true && q_flag == true) {
+          if( bigInt(p).equals(bigInt(rand)) == true) continue;
+          else{
+            var q = rand;
+            break;
+          }
+        }
+
+        else{
+          if (i<10){
+          var message = rand.toString();
+          res[i] = message;
+          i++;
+          }
+        }
+      }
     }
-    return [strconv(p),strconv(q)];
+    sessionStorage.setItem('prime_count',count);
+    sessionStorage.setItem('failrandom',res);
+    return [p.toString(),q.toString()];
   }
 
   RSA.Miller_Rabin.Prescreen = function(s) {
@@ -717,7 +996,10 @@ $('[data-toggle="offcanvas"]').click(function () {
    var mr_temp = addInt(mr_cand,-1);
 
    res = RSA.Miller_Rabin.calc(mr_base, mr_temp, mr_cand);
-   if ( equalsInt(res,1) ) return 1;
+   if ( equalsInt(res,1) ){
+    // console.log('ee');
+    return 1;
+  }
    return 0;
 }
 
@@ -758,12 +1040,17 @@ $('[data-toggle="offcanvas"]').click(function () {
         return res;
       }
       if (res==0) {
+          console.log('cc');
           message.push('since x is neither equals to 1 nor n-1 -> p is a composite number');
           sessionStorage.setItem('message',JSON.stringify(message));
           return false;
      }
     }
     var degree = sessionStorage.getItem('degree');
+    if (degree == null){
+      var numof9 = $('#num9').val();
+      degree = convertconf(numof9);
+    }
     message.push('p is a probable prime number with ' + degree + ' confidence');
     sessionStorage.setItem('message',JSON.stringify(message));
     return true;
@@ -836,14 +1123,22 @@ RSA.Miller_Rabin.calc = function(a,i,n) {
   //  j = floor(i/2)
   var j = dup(i); divInt_(j,2);
   var x= RSA.Miller_Rabin.calc(a, j, n);
+  // console.log('x = ' + strconv(x));
   if (isZero(x)) {
+    // console.log('bb');
     return zero;
   }
   //  y = (x*x)%n
   var y = expand(x,n.length); squareMod_(y,n);
-  if (equalsInt(y,1) && !equalsInt(x,1) && !equals(x, addInt(n,-1)) ) return zero; 
+  // console.log('y = ' +strconv(y)) ;
+  if (equalsInt(y,1) && !equalsInt(x,1) && !equals(x, addInt(n,-1)) ){
+    // console.log('aa');
+    return zero;
+  }  
   //y = (y*a)%n -> y=(x*x*a)%number
   if (i[0]%2==1) multMod_(y,a,n);
+  // console.log('y aft = ' +strconv(y)) ;
+  // console.log(strconv(y));
   return y;
  }
 });

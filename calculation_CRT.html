@@ -49,50 +49,46 @@ function goBack() {
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="e_calc">public key exponent(e):</label>
-                <textarea class = 'form-control' rows="2" id = "e_calc"></textarea>
+                <label for="p_calc">first prime number:</label>
+                <textarea class = 'form-control' rows="2" id = "p_CRT"></textarea>
               </div>
             </div>
 
               <!-- q input -->
             <div class="col-md-6">
               <div class="form-group">
-                <label for="Φn_calc">Φn:</label>
-                <textarea class = 'form-control' rows="2" id = "Φn_calc"></textarea>
+                <label for="q_calc">Second prime number:</label>
+                <textarea class = 'form-control' rows="2" id = "q_CRT"></textarea>
               </div>
             </div>
-
           </div>
-          <div class='row'>
-           <div id = "alert_euclid"></div> 
-          </div>
-          <div class='row'>
-          <div class='row'>
-            <div class='col-md-5'></div>
             <div class='col-md-4'>
-              <button type="button" class="btn btn-info"data-toggle="collapse" id="btn-Euclidcalc">Calculate</button>
+              <button type="button" class="btn btn-info" id="btn-CRTR">Generate Random Primes</button>
+            </div>
+            <div class='col-md-4'></div>
+            <div class='col-md-4'>
+              <button type="button" class="btn btn-info"data-toggle="collapse" id="btn-CRT">Calculate</button>
             </div>
           </div>
           <div class ="form-group"></div>
 
           <!-- first step -->
           <div id="collapse" class="collapse" hide>
+
             <div class="panel-group">
               <div class="panel panel-info">
                 <div class="panel-heading">
                   <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse1" >Steps for calculating private key exponent(d) by Extended Eucledian Algorithm</a>
+                    <a data-toggle="collapse" href="#collapse2" >Chinese Remainder Theorem Explanation</a>
                   </h4>
                 </div>
-                <div id="collapse1" class="panel-collapse" >
-                  <div class="panel-body" id='step_euclid'>
+                <div id="collapse2" class="panel-collapse collapse" >
+                  <div class="panel-body" id='step_CRT'>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-      </div>
         <!-- /#page-content-wrapper -->
 
     </div>
