@@ -14,10 +14,10 @@
   <link rel="stylesheet" href=".\css\sidebar.css">
     
   <!-- jQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src=".\js\jquery.min.js"></script>
   
   <!-- Bootstrap Core JavaScript -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src=".\js\bootstrap.min.js"></script>
 
   <!-- Big Integer JavaScript -->
   <script src=".\js\BigInt.js"></script>
@@ -124,6 +124,23 @@
                   <div class="col-md-12"> 
                     <div class="panel panel-info"> 
                       <div class="panel-heading">Explanation</div>
+                      <div id="exp_modal" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+                          <!-- Modal content-->
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal">&times;</button>
+                              <h4 class="modal-title">Explanation for conversion and splitter length</h4>
+                            </div>
+                            <div class="modal-body" id = "explanation">
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
                       <div class="panel-body" id="splitted"></div>
                     </div>
                     <div class="form-group">
@@ -137,13 +154,40 @@
               <section id='result' class='collapse' hide>
                 <div class='container'>
                   <div class='row'>
-                    <div class='col-md-3'>
-                      <label for='cipher'>Ciphertext:</label>
-                      <div class='well' id='cipher'></div>   
+                    <div class='col-md-2'>
+                        <label for='cipher'>Ciphertext:</label>
+                        <textarea type="text" class="form-control" rows='2' id="cipher">
+                        </textarea>
+                        <div id="msg_modal" class="modal fade" role="dialog">
+                          <div class="modal-dialog">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Warning</h4>
+                              </div>
+                              <div class="modal-body" id = "messages">
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                              </div>
+                            </div>
+                          </div>
+
+                      </div>
+                    </div>
+                    <div class='col-md-1'>
+                      <label for='btn-msg'>compute:</label>
+                      <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#msg_modal" id="btn-msg">Try</button>
                     </div>                   
                     <div class='col-md-1'>
                       <label for='e'>e:</label>
-                      <div class='well' id='e'></div>
+                      <div class="dropdown" id="dropdown">
+                      <button class="btn btn-primary dropdown-toggle btn-lg" type="button" data-toggle="dropdown" id = 'e'>
+                      </button>
+                      <ul class="dropdown-menu" id='e_drop'>  
+                      </ul>
+                    </div>
                     </div>
                     <div class='col-md-4'>
                       <label for='p'>p:</label>
@@ -170,15 +214,15 @@
                   </div>
                   <div class='row'>
                     <div class='col-md-4'>
-                      <label for='encrypted'>Converted Ciphertext:</label>
+                      <label for='converted'>Converted Plaintext:</label>
                       <div class='well' id='converted'></div>
                     </div>
                     <div class='col-md-4'>
-                      <label for='encrypted'>Encrypted Message(For 1 Ciphertext):</label>
+                      <label for='encrypted'>Encrypted Message(For 1 Plaintext):</label>
                       <div class='well' id='encrypted'></div>
                     </div>
                     <div class='col-md-4'>
-                      <label for='decrypted'>Decrypted Message(For 1 Ciphertext):</label>
+                      <label for='decrypted'>Decrypted Message(For 1 Plaintext):</label>
                       <div class='well' id='decrypted'></div>
                     </div>
                   </div>
@@ -191,43 +235,44 @@
                     <div class='well' id='decryptedf'></div>
                   </div>
               
-                  <div class='row'>
-                    <div class='col-md-0'></div>
+              <!--     <div class='row'>
+                    <div class='col-md-2'></div>
+                    <div class='col-md-4'>
+                      <ul class="pager">
+                        <li><a href="#Norm" id="NormPager"><strong>>>RSA Decryption method</strong></a>
+                        </li>
+                      </ul>    
+                    </div>
                     <div class='col-md-4'>
                       <ul class="pager">
                         <li><a href="#CRT" id="CRTPager"><strong>>>Alternative Solution to decrypt using CRT</strong></a>
                         </li>
                       </ul>    
                     </div>
+
+                    <div class='col-md-2'></div>
+                   
                     <div class='col-md-0'></div>
-                    <div class='col-md-4'>
-                      <ul class="pager">
-                        <li><a href="./calculation_euclid.html" id="DPager"><strong>>>Step Details for calculating d</strong></a>
-                        </li>
-                      </ul>    
-                    </div>
-                    <div class='col-md-0'></div>
-                    <div class='col-md-4'>
-                      <ul class="pager">
-                        <li><a href="./calculation.html" id="MRPager"><strong>>>Step details for Miller Rabin test</strong></a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div >
+                  </div > -->
                 </div>
               </section> 
               <!-- end of result -->
 
               <!-- Result Section -->
-              <section id='CRT' class='collapse' hide>
+              <section id='Norm' class='collapse' hide>
                 <div class= "container">
-                  <div class="col-md-12"></div>
                   <div class="col-md-12"> 
                     <div class="panel panel-info"> 
                       <div class="panel-heading">Explanation using normal RSA calculation</div>
                       <div class="panel-body" id="norm_exp"></div>
                     </div>
                   </div>
+                </div>
+              </section>
+
+              <section id='CRT' class='collapse' hide>
+                <div class= "container">
+                  <!-- <div class="col-md-12"></div> -->
                   <div class="col-md-12"> 
                     <div class="panel panel-info"> 
                       <div class="panel-heading">Explanation using CRT</div>

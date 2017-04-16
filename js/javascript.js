@@ -2,6 +2,7 @@
 //preserve THE HTML STATE
 //use pager instead of button on rsa?
 //min for range
+//change how it gets the data in bootstrap alert asap
 
 //DONE constraint in d page
 // confidence in miller rabin page
@@ -22,11 +23,12 @@
 //BUG:
 // INPUT 1-2 2 AW
 // range << text???
+// wrong range still can generate? --> if you mess with the first input, then mess with another but correct, it would enable generate -- fix logic
 $(document).ready(function () {
 
   var trigger = $('.hamburger'),
-      overlay = $('.      button_inp = $('#btn-input'),
-overlay'),
+      overlay = $('.overlay'),
+      button_inp = $('#btn-input'),
 
       button_exp = $('#btn-exp'),
       button_key = $('#btn-keygen'),
@@ -46,8 +48,10 @@ overlay'),
       MRMessage = [],
       EuclidMessage="",
       d_flag = true,
-      flag_sub_test = true;
+      flag_sub_test = true,
+      modify_flag = false;
 
+  sessionStorage.setItem('modify',modify_flag);
   sessionStorage.setItem('flag',d_flag);
   sessionStorage.setItem('flag_sub',flag_sub_test);
   sessionStorage.setItem('count',count_bef);
@@ -64,17 +68,6 @@ overlay'),
       button_inp.prop('disabled',false);
     }
   }
-
-  // if($('#splitter').length !=0 &&$('#result').length !=0) {
-  //   var flag_exp = localStorage.getItem('flag_exp');
-  //   var flag_res = localStorage.getItem('flag_res') ;
-  //   if (flag_exp == true) {
-  //     $('#splitter').show();
-  //   }
-  //   if (flag_res == true) {
-  //     $('#result').show();
-  //   }
-  // }
 
    button_inp.click(function() {
     // localStorage.setItem('flag_exp',true);
@@ -96,31 +89,38 @@ overlay'),
     var prime1 = sessionStorage.getItem('prime1');
     var prime2 = sessionStorage.getItem('prime2');
     var e = RSA.gcd(prime1,prime2);
-    var calc = RSA.calc(e,prime1,prime2,ciphertext[0]);
+    var calc = RSA.calc(e[0],prime1,prime2,ciphertext[0]);
     var enc = '';
     var dec ='';
     var convert = RSA.convert_text(ciphertext[0]);
 
     RSA.CRT(bigInt(prime1),bigInt(prime2),bigInt(calc[2]),bigInt(calc[3]));
 
-    sessionStorage.setItem('e',e);
+    sessionStorage.setItem('e',e[0]);
     sessionStorage.setItem('Φn',calc[1].toString());
     sessionStorage.setItem('num9',numof9);
+    sessionStorage.setItem('cipher',ciphertext[0]);
+    $('#e').text(e[0]);
+    var msg = '';
+    for (i=0;i<e.length;i++){
+      msg += '<li id =e'+i+'><a>'+e[i]+'</a></li>\n';
+    }
+    console.log(msg);
+    $('#e_drop').html(msg);
 
-    $('#e').text(e);
-    $('#p').text(prime1.toString());
-    $('#q').text(prime2.toString());
+    $('#p').html("<a href='./calculation.HTML' class='link'>" + prime1.toString()+'</a>');
+    $('#q').html("<a href='./calculation.HTML' class='link'>" + prime2.toString()+'</a>');
     $('#n').text(calc[0]);
     $('#Φn').text(calc[1]);
-    $('#d').text(calc[2]);
+    $('#d').html("<a href='./calculation_euclid.HTML' class='link'>" +calc[2]+'</a>');
     $('#cipher').text(ciphertext[0]);
     $('#converted').text(convert);
     $('#encrypted').text(calc[3]);
     $('#decrypted').text(calc[4]);
 
     for (var i = 0; i<ciphertext.length;i++){
-      enc += RSA.calc(e,prime1,prime2,ciphertext[i])[3].toString();
-      dec += RSA.calc(e,prime1,prime2,ciphertext[i])[4].toString();
+      enc += RSA.calc(e[0],prime1,prime2,ciphertext[i])[3].toString();
+      dec += RSA.calc(e[0],prime1,prime2,ciphertext[i])[4].toString();
     }
 
     $('#encryptedf').text(enc);
@@ -130,15 +130,18 @@ overlay'),
 
    button_exp.click(function() {
     // localStorage.setItem('flag_res',true);
+    $('#CRT').show();
+    bootstrap_alert.CRT();
+    $('#Norm').show();
+    bootstrap_alert.norm();
     $('#result').show();
     // return true; 
    })
 
     // sync the input from rsa to calc html
-    if (document.getElementById("p_calc") != null && document.getElementById("q_calc") != null) {
-      if(sessionStorage.getItem('prime1') != null && sessionStorage.getItem('prime2') != null && sessionStorage.getItem('num9') != null){
+    if (document.getElementById("p_calc") != null && document.getElementById("num9") != null) {
+      if(sessionStorage.getItem('prime1') != null && sessionStorage.getItem('num9') != null){
         document.getElementById("p_calc").value = (sessionStorage.getItem('prime1')).toString();  
-        document.getElementById("q_calc").value = (sessionStorage.getItem('prime2')).toString();
         document.getElementById("num9").value = (sessionStorage.getItem('num9'));
       }
     }
@@ -179,18 +182,6 @@ overlay'),
 
       //for q
       RSA.clean();
-      RSA.Miller_Rabin.MultiRounds(q,round);
-      var para_q ='';
-      var message_q = JSON.parse(sessionStorage.getItem('message'));
-      var index =0;
-      while(typeof message_q[index] !='undefined' && message_q[index].length>0 ){
-        if(index >= message_q.length) break;  
-        var para_q = para_q + message_q[index];
-        index++;
-    }
-    //fix the regex later
-    var res = para_q.replace(/[\b+p\b+]/,'q');
-    $('#step_q').html('<pre>'+res+'</pre>');
      });
     
   // give restriction as well for the input, especially e w.r.t tao
@@ -241,33 +232,37 @@ overlay'),
   $('#CRTPager').on('click',function() {
     $('#CRT').show();
     bootstrap_alert.CRT();
+  });
+
+  $('#NormPager').on('click',function() {
+    $('#Norm').show();
     bootstrap_alert.norm();
   });
 
-  $('#inputRange').keyup(function() {
-    var inputRange =$('#inputRange').val(),
-        input9 =$('#input9').val(),
-        inputMessage =$('#inputMessage').val(),
-        regex_range = /^(\d)*-(\d)*$/,
-        tag_out = '#alert_range',
-        message = 'Please input an integer!';
+  // $('#inputRange').keyup(function() {
+  //   var inputRange =$('#inputRange').val(),
+  //       input9 =$('#input9').val(),
+  //       inputMessage =$('#inputMessage').val(),
+  //       regex_range = /^(\d)*-(\d)*$/,
+  //       tag_out = '#alert_range',
+  //       message = 'Please input an integer!';
     
-    if(isNaN(inputRange) || regex_range.exec(inputRange) == null){
-      bootstrap_alert.warning(tag_out,message);
-      button_inp.prop('disabled',true);
-    }
-    else {
-      bootstrap_alert.fade(tag_out);
-      button_inp.prop('disabled',false);
-    }
+  //   if(isNaN(inputRange) || regex_range.exec(inputRange) == null){
+  //     bootstrap_alert.warning(tag_out,message);
+  //     button_inp.prop('disabled',true);
+  //   }
+  //   else {
+  //     bootstrap_alert.fade(tag_out);
+  //     button_inp.prop('disabled',false);
+  //   }
 
-    if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 ){
-      button_inp.prop('disabled',true);
-    }
-    // else{
-    //   button_inp.prop('disabled',false);
-    // }
-  })
+  //   if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0 ){
+  //     button_inp.prop('disabled',true);
+  //   }
+  //   // else{
+  //   //   button_inp.prop('disabled',false);
+  //   // }
+  // })
   $('#inputRange').keyup(function() {
     var inputRange =$('#inputRange').val(),
         input9 =$('#input9').val(),
@@ -293,9 +288,6 @@ overlay'),
     if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0){
       button_inp.prop('disabled',true);
     }
-    // else{
-    //   button_inp.prop('disabled',false);
-    // }
   })
 
   $('#input9').keyup(function() {
@@ -323,9 +315,6 @@ overlay'),
     if(inputRange.length ===0 || input9.length === 0 || inputMessage.length === 0){
       button_inp.prop('disabled',true);
     }
-    // else{
-    //   button_inp.prop('disabled',false);
-    // }
   })
   
   $('#inputMessage').keyup(function() {
@@ -342,26 +331,183 @@ overlay'),
       button_inp.prop('disabled',false);
     }
   })
-
-  $('#MRPager').on('click',function() {
-    sessionStorage.setItem('prime1',$('#p').text());
-    sessionStorage.setItem('prime2',$('#q').text());
-  })
-
   $('#splitted').on('click','a.link', function (e) {
       // e.preventDefault();
       //Get the id of parent container of anchor tag here
       // alert(this.parentNode.id);
       var tag = this.parentNode.id;
+      var reg = /div[0-9]+/;
+      console.log(tag);
+      console.log(reg);
+      console.log(reg.test(tag));
+
+      if (reg.test(tag)==true){
       var primerand = ($('#'+tag).text()).trim();
       sessionStorage.setItem('prime1',primerand);
-      sessionStorage.setItem('prime2',0);
+      }
+      else{
+      var ciphernum = ($('#'+tag).text()).trim();
+      sessionStorage.setItem('ciphernum',ciphernum);
+      bootstrap_alert.modal();
+      }
+
+    })
+
+    $('#p').on('click','a.link', function (e) {
+      var primerand = ($('#p').text()).trim();
+      sessionStorage.setItem('prime1',primerand);
+    })
+
+    $('#q').on('click','a.link', function (e) {
+      var primerand = ($('#q').text()).trim();
+      sessionStorage.setItem('prime1',primerand);
+    })
+
+    $("#btn-msg").on('click', function(e) {
+      var msg = document.getElementById("cipher").value;
+      var length = sessionStorage.getItem('length');
+      if (msg.length > parseInt(length) ) {
+        $('#btn-msg').attr("data-toggle","modal");
+        console.log('z');
+        var msg = "Please input a plaintext that has length within 1 to " + length + "\n";
+        $('#messages').html('<p>' + msg + '</p>');
+      }
+      else {
+        var modify_flag = true;
+        sessionStorage.setItem('modify',modify_flag);
+        $('#btn-msg').removeAttr("data-toggle");
+        console.log(msg); 
+        var numof9 = parseInt($('#input9').val());
+        var round = RSA.Miller_Rabin.confidence(numof9);
+        var prime1 = sessionStorage.getItem('prime1');
+        var prime2 = sessionStorage.getItem('prime2');
+        var e =  $('#e').text();
+        var calc = RSA.calc(e,prime1,prime2,msg);
+        var enc = '';
+        var dec ='';
+        var convert = RSA.convert_text(msg);
+
+        RSA.CRT(bigInt(prime1),bigInt(prime2),bigInt(calc[2]),bigInt(calc[3]));
+
+        sessionStorage.setItem('e',e);
+        sessionStorage.setItem('Φn',calc[1].toString());
+        sessionStorage.setItem('num9',numof9);
+        sessionStorage.setItem('cipher',cipher);
+        $('#p').html("<a href='./calculation.HTML' class='link'>" + prime1.toString()+'</a>');
+        $('#q').html("<a href='./calculation.HTML' class='link'>" + prime2.toString()+'</a>');
+        $('#n').text(calc[0]);
+        $('#Φn').text(calc[1]);
+        $('#d').html("<a href='./calculation_euclid.HTML' class='link'>" +calc[2]+'</a>');
+        $('#converted').text(convert);
+        $('#encrypted').text(calc[3]);
+        $('#decrypted').text(calc[4]);
+        $('#encryptedf').text(calc[3]);
+        $('#decryptedf').text(calc[4]);
+        bootstrap_alert.CRT();
+        bootstrap_alert.norm();
+      }
     })
 
 
+    $('#dropdown').on('click','li',function(){
+      var tag = this.id;
+      $('#e').text($('#'+tag).text());
+      var msg = document.getElementById("cipher").value;
+      var numof9 = parseInt($('#input9').val());
+      var round = RSA.Miller_Rabin.confidence(numof9);
+      var prime1 = sessionStorage.getItem('prime1');
+      var prime2 = sessionStorage.getItem('prime2');
+      var e =  $('#e').text();
+      var calc = RSA.calc(e,prime1,prime2,msg);
+      var enc = '';
+      var dec ='';
+      var convert = RSA.convert_text(msg);
 
 
+      RSA.CRT(bigInt(prime1),bigInt(prime2),bigInt(calc[2]),bigInt(calc[3]));
 
+      sessionStorage.setItem('e',e);
+      sessionStorage.setItem('Φn',calc[1].toString());
+      sessionStorage.setItem('num9',numof9);
+      sessionStorage.setItem('cipher',cipher);
+      $('#e').text(e);
+      $('#p').html("<a href='./calculation.HTML' class='link'>" + prime1.toString()+'</a>');
+      $('#q').html("<a href='./calculation.HTML' class='link'>" + prime2.toString()+'</a>');
+      $('#n').text(calc[0]);
+      $('#Φn').text(calc[1]);
+      $('#d').html("<a href='./calculation_euclid.HTML' class='link'>" +calc[2]+'</a>');
+      $('#converted').text(convert);
+      $('#encrypted').text(calc[3]);
+      $('#decrypted').text(calc[4]);
+      var flag = sessionStorage.getItem('modify');
+      if (flag == true){
+        var ciphertext = split_cipher($('#inputMessage').val(),parseInt(length));    
+        for (var i = 0; i<ciphertext.length;i++){
+          enc += RSA.calc(e[0],prime1,prime2,ciphertext[i])[3].toString();
+          dec += RSA.calc(e[0],prime1,prime2,ciphertext[i])[4].toString();
+        }
+      }
+      else{
+        enc = calc[3];
+        dec =calc[4];
+      }
+      $('#encryptedf').text(enc);
+      $('#decryptedf').text(dec);
+      bootstrap_alert.CRT();
+      bootstrap_alert.norm();
+    })
+  
+  //MR calculation checks for textarea
+  $('#num9').keyup(function() {
+    var input9 = document.getElementById("num9").value,
+        inputRange = document.getElementById("p_calc").value,
+        regex = /\D/,
+        tag_out = '#alert_confMR',
+        message = 'Please input an integer!',
+        button_inp = $('#btn-MRcalc');
+
+    if(isNaN(input9) || regex.exec(input9) !== null){
+      bootstrap_alert.warning(tag_out,message);
+      button_inp.prop('disabled',true);
+    }
+    else if (parseInt(input9) > 17){
+      message="cannot exceed 17!";
+      bootstrap_alert.warning(tag_out,message);
+      button_inp.prop('disabled',true);
+    }
+    else {
+      bootstrap_alert.fade(tag_out);
+      button_inp.prop('disabled',false);
+    }
+
+    if(inputRange.length ===0 || input9.length === 0){
+      bootstrap_alert.warning(tag_out,message);
+    button_inp.prop('disabled',true);
+    }
+  })
+
+  $('#p_calc').keyup(function() {
+    var input9 = document.getElementById("num9").value,
+        inputRange = document.getElementById("p_calc").value,
+        regex = /\D/,
+        tag_out = '#alert_confMR',
+        message = 'Please input an integer!',
+        button_inp = $('#btn-MRcalc');
+
+    if(isNaN(inputRange) || regex.exec(inputRange) !== null){
+      bootstrap_alert.warning(tag_out,message);
+      button_inp.prop('disabled',true);
+    }
+    else {
+      bootstrap_alert.fade(tag_out);
+      button_inp.prop('disabled',false);
+    }
+
+    if(inputRange.length ===0 || input9.length === 0){
+      bootstrap_alert.warning(tag_out,message);
+      button_inp.prop('disabled',true);
+    }
+  })
 
 
 
@@ -623,7 +769,6 @@ $('[data-toggle="offcanvas"]').click(function () {
   // if (j < split.length){
 
   function getLength(n,msg) {
-    // console.log('hai starting');
     if (!bigInt.isInstance(n)) var p =bigInt(n);
     else var p = n;
     for(var i=1;i<msg.length;i++){
@@ -642,8 +787,6 @@ $('[data-toggle="offcanvas"]').click(function () {
         var split = split_cipher(msg,cand);
         var enc = RSA.convert_text(split[j]);
         var bool = p.lesser(bigInt(enc));
-        // console.log(p.toString());
-        // console.log(enc);
         if (bool==true) {
           cand -=1;
           j = 0;
@@ -652,7 +795,6 @@ $('[data-toggle="offcanvas"]').click(function () {
       }
       else break;
     }
-    console.log(cand);
     if (cand <= 0){
       var tag = '#alert_general';
       var message = 'range for prime inputted are less than the range for the converted message! Please select the new range';
@@ -694,23 +836,30 @@ $('[data-toggle="offcanvas"]').click(function () {
     var degree = convertconf(numof9);
     var count = sessionStorage.getItem('prime_count');
     sessionStorage.setItem('degree',degree);
-    var message ="With the Plaintext (" + cipher +"),\nit will be splitted into several Ciphertexts,each with length of "+ split + ".";
+    var message ="With the Plaintext (" + cipher +"),\nit will be splitted into several Ciphertexts,each with length of "+ split + ".\n";
+    message +="it is "+ split + " because based on the prime number range that is provided and the ciphertext,\n"+ split+" is the minimum number to make sure that modulo n is still bigger than the ciphertext.\n";
+    message +="In addition, the modulo is tested against each length candidate by splitting the ciphertext using the candidate.\n";
+    message +="if all of the ciphertexts are smaller than modulo n, then it will increase the value of candidate by 1 \nuntil the next candidate produces ciphertexts that are bigger than n.\n";
     message += "Thus, the Plaintext would be splitted into:\n";
     for (var i = 0; i<arr.length;i++) {
-      message += arr[i] + ";\n" ;
+      message += arr[i] + ";" + "<div data-toggle='modal' data-target='#exp_modal' id=modal"+i+"><a href='#' class='link'>"+ RSA.convert_text(arr[i]) +"</a></div>";
     }
     message +="\n";
     message +="Since the number of 9 for the confidence is "+ numof9 +",This means that it will be tested for "+round+" rounds,\n";
     message +="For the 2 big prime numbers to be at least "+ degree +" that it is a prime.\n";
+    message +="the number of rounds is obtained by using the following formula: \n";
+    message +="1 - (1/4)^j >= desired percentage\n";
+    message +="where j is the number of rounds, and desired percentage is the confidence levels.\n";
+    message +="with desired percentage equals to " + degree +" , we can get j = " + round + ".\n"; 
     message +="From the parameter inputted above, the total random number that are tested are: " + count + ".\nFor the demo purposes, only the max. of 10 numbers are displayed.\nThese are the random numbers that are failed to pass the Miller-Rabin algorithm test:\n";
     var res =sessionStorage.getItem('failrandom');
 
     res = res.split(',');
     var length = res.length;
     for (var i = 0 ; i<res.length;i++){
-      message += "<div id='div"+i+"'>\n";
-      message += "<a href='./calculation.HTML' class='link'>"+res[i] + '</a>\n';
-      message +="</div>\n";
+      message += "<div id='div"+i+"'>";
+      message += "<a href='./calculation.html' class='link'>"+res[i] + '</a>';
+      message +="</div>";
     }
     message +="\n==================================================================================================================\n";
     message +="Help section";
@@ -754,7 +903,7 @@ $('[data-toggle="offcanvas"]').click(function () {
     var e = $('#e').text();
     var n = $('#n').text();
     var tao =$('#Φn').text();
-    var cipher = $('#cipher').text();
+    var cipher = document.getElementById("cipher").value;
     var convert = $('#converted').text();
     var dec= $('#decrypted').text();
     var message ="The RSA algorithm involves four steps: key generation, key distribution, encryption and decryption.\n";
@@ -766,8 +915,38 @@ $('[data-toggle="offcanvas"]').click(function () {
     message +="With c = m^e(mod n) as the encryption formula, where m is the message("+convert+"),\nand c is the encrypted text, the value of c is = "+enc+" .\n";
     message +="One can decipher the message from c by using c^d(mod n) formula,\nin this case the decrypted value would be: "+dec+" .\n";
     message +="the recovered message can be converted back to text, which would be = "+cipher+".\n";
-    $('#norm_exp').html('<div class="panel-body" id="CRT_exp"><pre>'+ message +'</pre></div>');
+    $('#norm_exp').html('<div class="panel-body" id="norm_exp"><pre>'+ message +'</pre></div>');
   }
+
+  bootstrap_alert.modal = function(){
+    var cipher = $('#inputMessage').val();
+    // var split = parseInt($('#inputLength').val());
+    var numof9 = $('#input9').val();
+    var round = RSA.Miller_Rabin.confidence(numof9);
+    var primes = bigInt(RSA.Miller_Rabin.Prime($('#inputRange').val(),round));
+    sessionStorage.setItem('prime1',primes[0]);
+    sessionStorage.setItem('prime2',primes[1]);
+    var n =bigInt(primes[0].toString()).multiply(primes[1].toString());
+    var split = sessionStorage.getItem('length');
+    var arr = split_cipher(cipher,parseInt(split));
+    
+    var numof9 = $('#input9').val();
+    var degree = convertconf(numof9);
+    var count = sessionStorage.getItem('prime_count');
+    sessionStorage.setItem('degree',degree);
+    var ciphernum = sessionStorage.getItem('ciphernum');
+
+    var message = "The conversion is done by converting each character using ASCII number,\nand concatenate them together to form a big integer number.\n\n";
+    message += "There is a padding 0s for the ASCII number however, to make sure that\nthe message can be recovered back later on without any confusion.\n\n";
+    message += "An example for the padding would be a word 'cd'. In ASCII, 'c' is 67 and 'd' is 68.\nThe program then add 0 in front of the number, so it becomes 067 and 068 respectively.\n\n";
+    message += "After doing the RSA calculation, the program will get 67068 as a decrypted number\n(notice that 0 in front is gone because of int calculation).\n\n";
+    message +="Then, it would slice the string with length =3 each, except for the first part\nwith length = 3-(encrypted.length - decrypted.length)(because the padding is gone for the first char)\n\n";
+    message +="With the padding scheme, the conversion from number back to the original message will be 100% accurate.\n\n";
+    message +="=======================================================================================================\n";
+    message += "As it has been explained before, the length is obtained by comparing modulo n and the ciphertexts.\n\n";
+    message += "In this case, n = "+ n + " is bigger than "+ciphernum+"\n";
+    $('#explanation').html('<div class="modal-body" id="explanation"><pre>'+ message +'</pre></div>');
+}
 
   function bigIntconv(num){
     return str2bigInt(num.toString(),10,num.length);
@@ -794,10 +973,16 @@ $('[data-toggle="offcanvas"]').click(function () {
     var p_big= bigInt(p);
     var q_big = bigInt(q);
     var tao = (p_big.minus(1)).multiply(q_big.minus(1));
+    var count = 0;
+    var arr = [];
     for (var i=0;i<smallPrimes.length;i++){
-      if(bigInt.gcd(bigInt(smallPrimes[i]),tao).equals(1)) break;
+      if (count == 5) break;
+      if(bigInt.gcd(bigInt(smallPrimes[i]),tao).equals(1)) {
+        arr[count] = smallPrimes[i];
+        count++;
+      }
     }
-    return smallPrimes[i];
+    return arr;
   }
 
   RSA.calc = function(e,p,q,cipher) {
@@ -856,6 +1041,10 @@ $('[data-toggle="offcanvas"]').click(function () {
     return [dP.toString(),dQ.toString(),qInv.toString(),m1.toString(),m2.toString(),h.toString(),m.toString()];
   }
 
+  String.prototype.paddingLeft = function (paddingValue) {
+   return String(paddingValue + this).slice(-paddingValue.length);
+};
+
   //reinforce conversion
   RSA.convert_text=function(m) {
     var enc="",
@@ -863,6 +1052,8 @@ $('[data-toggle="offcanvas"]').click(function () {
     str = m.toString();
     for (var i =0;i< m.length;i++){
       var block = m.charCodeAt(i);
+        block = block.toString().paddingLeft("000");
+            console.log(block);
       enc = enc + block;  
     }
     return enc;
@@ -1013,20 +1204,21 @@ $('[data-toggle="offcanvas"]').click(function () {
     //reset head messages
     sessionStorage.setItem('flag',d_flag);
     var message = JSON.parse(sessionStorage.getItem('message'));
-    var res,res2, a,s = n.toString().replace(/\s/g,'');
+    var res,a,s = n.toString().replace(/\s/g,'');
     // var b = int2bigInt(0,1,1); 
     // var big =bigInt2str(bigIntconv(n),2);
      //get the random true prime by using conversion of string to base 2
     var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113];
-    message.push('p will be tested for '+rounds.toString()+' rounds with a small base primes : [2;3;5..109;113]\n');
+    var numof9 = $('#num9').val();
+    message.push('the candidate will be tested for '+rounds.toString()+' rounds with a small base primes : [2;3;5..109;113]\n');
     // message.push('In addition; p will also be tested with random true prime ranging from 113 to n to strengthen the probability that p is a prime number\n');
      for (var k=0;k<rounds;k++) {
       a = smallPrimes[k];
       message.push('=============================================================\n');
-      message.push('for a equals to : '+ a+'\n');
+      message.push('Rabin Miller test for round #'+(k+1) +' : a = '+ a+'\n');
       if (s == ''+a) {
         message.push("since p (" + s + ") is equal to " + a + " (true prime)\n");
-        message.push('p is a probable prime number with 100% confidence');
+        message.push(n +' is a prime number');
         sessionStorage.setItem('message',JSON.stringify(message));
         return true;
       }
@@ -1046,12 +1238,10 @@ $('[data-toggle="offcanvas"]').click(function () {
           return false;
      }
     }
-    var degree = sessionStorage.getItem('degree');
-    if (degree == null){
-      var numof9 = $('#num9').val();
-      degree = convertconf(numof9);
-    }
-    message.push('p is a probable prime number with ' + degree + ' confidence');
+    var numof9 = $('#num9').val();
+    degree = convertconf(numof9);
+
+    message.push(n+' is a prime number with ' + numof9+ ' 9s of confidence');
     sessionStorage.setItem('message',JSON.stringify(message));
     return true;
   }
